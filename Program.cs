@@ -1,6 +1,7 @@
 using MongoDB.Driver;
 using TeamProjectPlanner.Components;
 using TeamProjectPlanner.Data;
+using TeamProjectPlanner.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,13 +43,15 @@ builder.Services.AddSingleton<IMongoDatabase>(serviceProvider =>
     return serviceProvider.GetRequiredService<IMongoClient>().GetDatabase(settings.DatabaseName);
 });
 
+// Add project service
+builder.Services.AddSingleton<ProjectService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
