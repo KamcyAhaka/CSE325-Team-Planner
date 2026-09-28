@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>e953eb16-5a07-4710-a32a-df30ae77ff6d</UserSecretsId>
+    <UserSecretsId>TeamProjectPlanner-Local</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

@@ -25,16 +25,24 @@ A modern, responsive collaboration workspace built with Blazor, designed for stu
 
 ## Environment Configuration
 
-To run this project locally, update `appsettings.json` (or `appsettings.Development.json`) in the project root with your MongoDB Atlas connection string and database name:
+The app registers a singleton MongoDB client and database through dependency injection. Configure the database name in `appsettings.json`, then provide the connection string through .NET user secrets or the `MONGODB_URI` environment variable:
 
 ```json
 {
   "MongoDB": {
-    "ConnectionString": "mongodb+srv://<user>:<password>@cluster.mongodb.net/?retryWrites=true&w=majority",
     "DatabaseName": "TeamProjectPlanner"
   }
 }
 ```
+
+For local development, use user secrets:
+
+```bash
+dotnet user-secrets init
+dotnet user-secrets set "MongoDB:ConnectionString" "mongodb+srv://<user>:<password>@cluster.mongodb.net/?retryWrites=true&w=majority"
+```
+
+Repositories and services can request `IMongoDatabase` from dependency injection.
 
 > [!IMPORTANT]
 > **Never commit credentials to source control.**

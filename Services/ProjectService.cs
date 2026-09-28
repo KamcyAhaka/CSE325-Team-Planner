@@ -1,5 +1,4 @@
 using MongoDB.Driver;
-using TeamProjectPlanner.Data;
 using TeamProjectPlanner.Models;
 
 namespace TeamProjectPlanner.Services;
@@ -8,23 +7,8 @@ public class ProjectService
 {
     private readonly IMongoCollection<Project> _projects;
 
-    public ProjectService(MongoDbSettings settings)
+    public ProjectService(IMongoDatabase database)
     {
-        if (string.IsNullOrWhiteSpace(settings.ConnectionString))
-        {
-            throw new InvalidOperationException(
-                "MongoDB connection string is not configured.");
-        }
-
-        if (string.IsNullOrWhiteSpace(settings.DatabaseName))
-        {
-            throw new InvalidOperationException(
-                "MongoDB database name is not configured.");
-        }
-
-        var client = new MongoClient(settings.ConnectionString);
-        var database = client.GetDatabase(settings.DatabaseName);
-
         _projects = database.GetCollection<Project>("Projects");
     }
 
