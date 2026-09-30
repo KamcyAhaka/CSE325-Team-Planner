@@ -47,6 +47,9 @@ builder.Services.AddSingleton<IMongoDatabase>(serviceProvider =>
 builder.Services.AddSingleton<ProjectService>();
 builder.Services.AddSingleton<BoardService>();
 
+// Add member service
+builder.Services.AddSingleton<ProjectMemberService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
