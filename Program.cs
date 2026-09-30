@@ -46,6 +46,7 @@ builder.Services.AddSingleton<IMongoDatabase>(serviceProvider =>
 
 // Add project service
 builder.Services.AddSingleton<ProjectService>();
+builder.Services.AddSingleton<BoardService>();
 
 // Add authentication services
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
