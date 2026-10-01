@@ -7,12 +7,14 @@ namespace TeamProjectPlanner.Services;
 public class AuthService
 {
     private readonly UserService _userService;
-    private readonly HttpContext _httpContext;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public AuthService(UserService userService, HttpContext httpContext)
+    public AuthService(
+        UserService userService,
+        IHttpContextAccessor httpContextAccessor)
     {
         _userService = userService;
-        _httpContext = httpContext;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<(bool Success, string? Error)> LoginAsync(string email, string password)
@@ -42,9 +44,11 @@ public class AuthService
             new(ClaimTypes.Name, user.DisplayName)
         };
 
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var identity = new ClaimsIdentity(
+            claims,
+            CookieAuthenticationDefaults.AuthenticationScheme);
 
-        await _httpContext.SignInAsync(
+        await _httpContextAccessor.HttpContext!.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(identity),
             new AuthenticationProperties
@@ -58,6 +62,7 @@ public class AuthService
 
     public async Task LogoutAsync()
     {
-        await _httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        await _httpContextAccessor.HttpContext!.SignOutAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme);
     }
 }
