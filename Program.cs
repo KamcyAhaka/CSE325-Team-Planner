@@ -51,6 +51,9 @@ builder.Services.AddSingleton<BoardService>();
 // Add task service
 builder.Services.AddSingleton<TaskService>();
 
+// Add member service
+builder.Services.AddSingleton<ProjectMemberService>();
+
 // Add authentication services
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
