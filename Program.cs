@@ -53,7 +53,7 @@ builder.Services.AddSingleton<TaskService>();
 
 // Add member service
 builder.Services.AddSingleton<ProjectMemberService>();
-
+builder.Services.AddHttpContextAccessor();
 // Add authentication services
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
