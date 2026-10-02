@@ -1,0 +1,109 @@
+@page "/projects"
+@rendermode InteractiveServer
+
+@using TeamProjectPlanner.Models
+@using TeamProjectPlanner.Services
+@inject ProjectService ProjectService
+
+<PageTitle>Projects</PageTitle>
+
+<h1>Projects</h1>
+
+<p>Create and manage your projects.</p>
+
+<div class="card p-4 mt-4">
+    <h2>Create Project</h2>
+
+    <EditForm Model="@project"
+              OnValidSubmit="@CreateProject"
+              FormName="create-project">
+
+        <div class="mb-3">
+            <label for="projectName" class="form-label">Project Name</label>
+            <InputText id="projectName"
+                       class="form-control"
+                       @bind-Value="project.Name" />
+        </div>
+
+        <div class="mb-3">
+            <label for="projectDescription" class="form-label">Description</label>
+            <InputTextArea id="projectDescription"
+                           class="form-control"
+                           @bind-Value="project.Description" />
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="startDate" class="form-label">Start Date</label>
+                <InputDate id="startDate"
+                           class="form-control"
+                           @bind-Value="project.StartDate" />
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="endDate" class="form-label">End Date</label>
+                <InputDate id="endDate"
+                           class="form-control"
+                           @bind-Value="project.EndDate" />
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Create Project
+        </button>
+    </EditForm>
+</div>
+
+@if (projects.Count > 0)
+{
+    <div class="mt-4">
+        <h2>Projects</h2>
+
+        <div class="row">
+            @foreach (var item in projects)
+            {
+                <div class="col-md-6 mb-3">
+                    <div class="card p-3 h-100">
+                        <h3>@item.Name</h3>
+
+                        <p>@item.Description</p>
+
+                        <p class="mb-1">
+                            <strong>Start:</strong>
+                            @item.StartDate.ToString("MMM dd, yyyy")
+                        </p>
+
+                        <p>
+                            <strong>End:</strong>
+                            @item.EndDate.ToString("MMM dd, yyyy")
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="mt-4">
+        <p>No projects have been created yet.</p>
+    </div>
+}
+
+@code {
+    private Project project = new();
+    private List<Project> projects = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        projects = await ProjectService.GetProjectsAsync();
+    }
+
+    private async Task CreateProject()
+    {
+        await ProjectService.CreateProjectAsync(project);
+
+        project = new Project();
+        projects = await ProjectService.GetProjectsAsync();
+    }
+}
