@@ -54,10 +54,14 @@ builder.Services.AddSingleton<TaskService>();
 // Add member service
 builder.Services.AddSingleton<ProjectMemberService>();
 builder.Services.AddHttpContextAccessor();
-// Add authentication services
+
+// Add authentication and authorization services
+builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
+        options.LoginPath = "/auth/sign-in";
+        options.LogoutPath = "/api/auth/logout";
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
         options.SlidingExpiration = true;
     });
@@ -84,6 +88,29 @@ app.UseAntiforgery();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Authentication HTTP endpoints
+app.MapPost("/api/auth/login", async (
+    [Microsoft.AspNetCore.Mvc.FromForm] string email,
+    [Microsoft.AspNetCore.Mvc.FromForm] string password,
+    [Microsoft.AspNetCore.Mvc.FromForm] string? returnUrl,
+    AuthService authService) =>
+{
+    var (success, error) = await authService.LoginAsync(email, password);
+    if (!success)
+    {
+        var redirectUrl = $"/auth/sign-in?error={Uri.EscapeDataString(error ?? "Invalid email or password.")}";
+        return Results.Redirect(redirectUrl);
+    }
+
+    return Results.Redirect(string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl);
+}).DisableAntiforgery();
+
+app.MapGet("/api/auth/logout", async (AuthService authService) =>
+{
+    await authService.LogoutAsync();
+    return Results.Redirect("/auth/sign-in");
+});
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
