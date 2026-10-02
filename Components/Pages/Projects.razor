@@ -1,9 +1,14 @@
 @page "/projects"
 @rendermode InteractiveServer
+@attribute [Authorize]
 
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using TeamProjectPlanner.Models
 @using TeamProjectPlanner.Services
 @inject ProjectService ProjectService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Projects</PageTitle>
 
@@ -101,6 +106,13 @@ else
 
     private async Task CreateProject()
     {
+        var authenticationState = await AuthenticationStateProvider
+            .GetAuthenticationStateAsync();
+
+        var user = authenticationState.User;
+
+        project.OwnerId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+
         await ProjectService.CreateProjectAsync(project);
 
         project = new Project();
