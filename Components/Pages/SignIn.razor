@@ -1,0 +1,85 @@
+@page "/auth/sign-in"
+@page "/sign-in"
+@page "/login"
+@layout Layout.AuthLayout
+
+<PageTitle>Sign In - Team Project Planner</PageTitle>
+
+<div class="auth-header">
+    <h1 class="auth-title">Sign in to keep track of your projects and tasks</h1>
+</div>
+
+@if (!string.IsNullOrEmpty(Registered) && Registered.Equals("true", StringComparison.OrdinalIgnoreCase))
+{
+    <div class="alert-banner alert-success" role="alert">
+        <svg class="alert-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <span>Account created successfully! Please sign in with your email and password.</span>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Error))
+{
+    <div class="alert-banner alert-error" role="alert">
+        <svg class="alert-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span>@Error</span>
+    </div>
+}
+
+<form method="post" action="/api/auth/login" class="auth-form" onsubmit="var btn = document.getElementById('signin-btn'); if (btn) { btn.innerText = 'Signing In...'; }">
+    <input type="hidden" name="returnUrl" value="@ReturnUrl" />
+
+    <!-- Email Field -->
+    <div class="form-field">
+        <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Email"
+            class="form-input"
+            autocomplete="email"
+            required />
+    </div>
+
+    <!-- Password Field -->
+    <div class="form-field">
+        <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Password"
+            class="form-input"
+            autocomplete="current-password"
+            required />
+        <div class="forgot-password-row">
+            <a href="#" class="forgot-password-link">Forgot password?</a>
+        </div>
+    </div>
+
+    <!-- Submit Button -->
+    <button
+        id="signin-btn"
+        type="submit"
+        class="btn-submit">
+        Sign In
+    </button>
+</form>
+
+<div class="auth-footer">
+    <span>No account? </span>
+    <a href="/auth/sign-up" class="auth-link">Create account here</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Error { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string? Registered { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+}
