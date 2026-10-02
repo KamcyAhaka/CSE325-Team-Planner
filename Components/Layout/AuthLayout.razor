@@ -1,0 +1,27 @@
+@inherits LayoutComponentBase
+
+<div class="auth-layout">
+    <!-- Left side: Illustration on desktop -->
+    <aside class="auth-illustration-panel" aria-label="Welcome artwork">
+        <div class="auth-illustration-box">
+            <img src="images/auth-illustration.png" alt="Team Collaboration Illustration" class="auth-illustration-image" />
+        </div>
+    </aside>
+
+    <!-- Right side: Auth Form Container -->
+    <main class="auth-form-panel">
+        <div class="auth-form-wrapper">
+            <!-- Centered Logo -->
+            <div class="auth-logo-container">
+                <a href="/" class="auth-logo-box" aria-label="Go to home">
+                    <img src="favicon.svg" alt="Team Project Planner Logo" class="auth-logo-image" />
+                </a>
+            </div>
+
+            <!-- Auth Form Content -->
+            <section class="auth-form-body">
+                @Body
+            </section>
+        </div>
+    </main>
+</div>
