@@ -1,0 +1,64 @@
+@implements IDisposable
+@inject ToastService ToastService
+
+<div class="toast-stack" role="region" aria-label="Notifications" aria-live="polite">
+    @foreach (var toast in ToastService.Toasts)
+    {
+        <div @key="toast.Id"
+             class="app-toast app-toast-@toast.Level.ToString().ToLowerInvariant()"
+             role="@(toast.Level == ToastLevel.Error ? "alert" : "status")">
+            <span class="app-toast-message">@toast.Message</span>
+            <button type="button"
+                    class="app-toast-close"
+                    aria-label="Dismiss notification"
+                    @onclick="() => ToastService.Dismiss(toast.Id)">
+                &times;
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private readonly HashSet<Guid> scheduled = new();
+    private readonly CancellationTokenSource disposed = new();
+
+    protected override void OnInitialized()
+    {
+        ToastService.Changed += OnToastsChanged;
+    }
+
+    private void OnToastsChanged()
+    {
+        foreach (var toast in ToastService.Toasts)
+        {
+            if (scheduled.Add(toast.Id))
+            {
+                _ = DismissLaterAsync(toast);
+            }
+        }
+
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private async Task DismissLaterAsync(ToastMessage toast)
+    {
+        try
+        {
+            await Task.Delay(toast.Duration, disposed.Token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        scheduled.Remove(toast.Id);
+        ToastService.Dismiss(toast.Id);
+    }
+
+    public void Dispose()
+    {
+        ToastService.Changed -= OnToastsChanged;
+        disposed.Cancel();
+        disposed.Dispose();
+    }
+}
