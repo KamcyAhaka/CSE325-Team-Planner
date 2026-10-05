@@ -1,0 +1,90 @@
+﻿@inherits LayoutComponentBase
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div class="dashboard-shell">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-logo">
+                <img src="favicon.svg" alt="Logo" />
+            </div>
+            <div>
+                <div class="sidebar-brand-name">Team Planner</div>
+                <div class="sidebar-brand-sub">COLLABORATIVE HUB</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <NavLink href="/dashboard" class="sidebar-link" Match="NavLinkMatch.All">
+                <span class="icon icon-dashboard"></span>
+                <span>Dashboard</span>
+            </NavLink>
+
+            <NavLink href="/projects" class="sidebar-link" Match="NavLinkMatch.Prefix">
+                <span class="icon icon-folder"></span>
+                <span>Projects</span>
+            </NavLink>
+        </nav>
+
+        <div class="sidebar-create-wrap">
+            <a href="/projects" class="sidebar-create">
+                <span class="icon icon-plus"></span>
+                <span>Create Project</span>
+            </a>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="avatar">@Initials</div>
+                <div class="sidebar-user-meta">
+                    <div class="sidebar-user-name">@DisplayName</div>
+                    <div class="sidebar-user-email">@Email</div>
+                </div>
+            </div>
+
+            <a href="/api/auth/logout" class="sidebar-signout">
+                <span class="icon icon-log-out"></span>
+                <span>Sign Out</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main">
+        @Body
+    </main>
+</div>
+
+@code {
+    private string DisplayName = "User";
+    private string Email = "";
+    private string Initials = "U";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            DisplayName = user.FindFirstValue(ClaimTypes.Name) ?? "User";
+            Email = user.FindFirstValue(ClaimTypes.Email) ?? "";
+            Initials = GetInitials(DisplayName);
+        }
+    }
+
+    private static string GetInitials(string name)
+    {
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        if (parts.Length == 0) return "U";
+        var first = parts[0][0].ToString();
+        if (parts.Length < 2) return first.ToUpperInvariant();
+
+        var last = parts[^1][0].ToString();
+        return (first + last).ToUpperInvariant();
+    }
+}
+
+
+

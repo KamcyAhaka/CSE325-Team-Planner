@@ -1,0 +1,57 @@
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<header class="dashboard-header">
+    <div>
+        <h1 class="dashboard-title">@Title</h1>
+        @if (!string.IsNullOrWhiteSpace(Subtitle))
+        {
+            <p class="dashboard-subtitle">@Subtitle</p>
+        }
+    </div>
+
+    <div class="header-user">
+        <div class="avatar avatar-sm">@Initials</div>
+        <div>
+            <div class="header-user-name">@DisplayName</div>
+            <div class="header-user-email">@Email</div>
+        </div>
+    </div>
+</header>
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string? Subtitle { get; set; }
+
+    private string DisplayName = "User";
+    private string Email = "";
+    private string Initials = "U";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            DisplayName = user.FindFirstValue(System.Security.Claims.ClaimTypes.Name) ?? "User";
+            Email = user.FindFirstValue(System.Security.Claims.ClaimTypes.Email) ?? "";
+            Initials = GetInitials(DisplayName);
+        }
+    }
+
+    private static string GetInitials(string name)
+    {
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        if (parts.Length == 0) return "U";
+
+        var first = parts[0][0].ToString();
+
+        if (parts.Length < 2) return first.ToUpperInvariant();
+
+        var last = parts[^1][0].ToString();
+        return (first + last).ToUpperInvariant();
+    }
+}
