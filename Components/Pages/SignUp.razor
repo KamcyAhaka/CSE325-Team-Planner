@@ -5,6 +5,7 @@
 @rendermode InteractiveServer
 @inject UserService UserService
 @inject NavigationManager NavigationManager
+@inject ILogger<SignUp> Logger
 
 <PageTitle>Sign Up - Team Project Planner</PageTitle>
 
@@ -214,8 +215,11 @@ else
         }
         catch (Exception ex)
         {
-            generalError = "An unexpected error occurred while creating your account. Please try again.";
-            Console.WriteLine($"Registration error: {ex.Message}");
+            Logger.LogError(ex, "Registration failed");
+            var message = ErrorMessages.ForUser(ex);
+            generalError = message == ErrorMessages.Generic
+                ? "An unexpected error occurred while creating your account. Please try again."
+                : message;
             isLoading = false;
         }
     }

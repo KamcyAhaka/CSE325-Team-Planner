@@ -1,0 +1,26 @@
+.error-fallback {
+    max-width: 36rem;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 0.75rem;
+    background: rgba(239, 68, 68, 0.06);
+    color: #1e293b;
+}
+
+.error-fallback-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.error-fallback-text {
+    color: #475569;
+    margin-bottom: 1rem;
+}
+
+.error-fallback-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}

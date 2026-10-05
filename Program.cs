@@ -72,6 +72,10 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthService>();
 
+// Add error handling and user feedback services
+builder.Services.AddScoped<ToastService>();
+builder.Services.AddScoped<UiActionRunner>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -80,6 +84,9 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
+
+// Show the friendly 404 page for unknown URLs
+app.UseStatusCodePagesWithReExecute("/not-found");
 
 app.UseHttpsRedirection();
 
@@ -94,9 +101,22 @@ app.MapPost("/api/auth/login", async (
     [Microsoft.AspNetCore.Mvc.FromForm] string email,
     [Microsoft.AspNetCore.Mvc.FromForm] string password,
     [Microsoft.AspNetCore.Mvc.FromForm] string? returnUrl,
-    AuthService authService) =>
+    AuthService authService,
+    ILogger<Program> logger) =>
 {
-    var (success, error) = await authService.LoginAsync(email, password);
+    bool success;
+    string? error;
+
+    try
+    {
+        (success, error) = await authService.LoginAsync(email, password);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Login failed unexpectedly");
+        (success, error) = (false, ErrorMessages.ForUser(ex));
+    }
+
     if (!success)
     {
         var redirectUrl = $"/auth/sign-in?error={Uri.EscapeDataString(error ?? "Invalid email or password.")}";

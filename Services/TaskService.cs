@@ -14,19 +14,7 @@ public class TaskService
 
     public async Task CreateTaskAsync(ProjectTask task)
     {
-        if (string.IsNullOrWhiteSpace(task.Title))
-        {
-            throw new ArgumentException(
-                "Task title is required.",
-                nameof(task));
-        }
-
-        if (string.IsNullOrWhiteSpace(task.ProjectId))
-        {
-            throw new ArgumentException(
-                "Task project is required.",
-                nameof(task));
-        }
+        EntityValidator.EnsureValid(task);
 
         task.CreatedAt = DateTime.UtcNow;
 
