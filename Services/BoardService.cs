@@ -14,19 +14,7 @@ public class BoardService
 
     public async Task CreateBoardAsync(Board board)
     {
-        if (string.IsNullOrWhiteSpace(board.Name))
-        {
-            throw new ArgumentException(
-                "Board name is required.",
-                nameof(board));
-        }
-
-        if (string.IsNullOrWhiteSpace(board.ProjectId))
-        {
-            throw new ArgumentException(
-                "Project ID is required.",
-                nameof(board));
-        }
+        EntityValidator.EnsureValid(board);
 
         await _boards.InsertOneAsync(board);
     }

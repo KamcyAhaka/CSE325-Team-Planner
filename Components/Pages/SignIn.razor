@@ -29,7 +29,7 @@
     </div>
 }
 
-<form method="post" action="/api/auth/login" class="auth-form" onsubmit="var btn = document.getElementById('signin-btn'); if (btn) { btn.innerText = 'Signing In...'; }">
+<form method="post" action="/api/auth/login" class="auth-form" onsubmit="var btn = document.getElementById('signin-btn'); if (btn) { btn.innerText = 'Signing In...'; btn.disabled = true; }">
     <input type="hidden" name="returnUrl" value="@ReturnUrl" />
 
     <!-- Email Field -->

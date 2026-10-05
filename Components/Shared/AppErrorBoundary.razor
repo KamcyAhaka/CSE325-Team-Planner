@@ -1,0 +1,26 @@
+@inject NavigationManager Navigation
+
+@* Shows a fallback when a child component throws. On interactive pages, wrap child
+   components with this and run event handlers through UiActionRunner. *@
+<ErrorBoundary>
+    <ChildContent>
+        @ChildContent
+    </ChildContent>
+    <ErrorContent>
+        <div class="error-fallback" role="alert">
+            <h2 class="error-fallback-title">Something went wrong</h2>
+            <p class="error-fallback-text">
+                This part of the page ran into an unexpected problem. Reloading usually fixes it.
+            </p>
+            <div class="error-fallback-actions">
+                <a class="btn btn-primary" href="@Navigation.Uri" data-enhance-nav="false">Reload page</a>
+                <a class="btn btn-outline-secondary" href="" data-enhance-nav="false">Go to home</a>
+            </div>
+        </div>
+    </ErrorContent>
+</ErrorBoundary>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

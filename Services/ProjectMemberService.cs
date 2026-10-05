@@ -14,19 +14,7 @@ public class ProjectMemberService
 
     public async Task AddMemberAsync(ProjectMember member)
     {
-        if (string.IsNullOrWhiteSpace(member.ProjectId))
-        {
-            throw new ArgumentException(
-                "Project id is required.",
-                nameof(member));
-        }
-
-        if (string.IsNullOrWhiteSpace(member.UserId))
-        {
-            throw new ArgumentException(
-                "User id is required.",
-                nameof(member));
-        }
+        EntityValidator.EnsureValid(member);
 
         var alreadyMember = await _members
             .Find(m => m.ProjectId == member.ProjectId && m.UserId == member.UserId)
@@ -34,7 +22,7 @@ public class ProjectMemberService
 
         if (alreadyMember != null)
         {
-            throw new ArgumentException(
+            throw new AppValidationException(
                 "User is already a member of this project.");
         }
 

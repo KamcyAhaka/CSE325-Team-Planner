@@ -9,23 +9,52 @@ public class UserService
     private readonly IMongoCollection<AppUser> _users;
     private readonly PasswordHasher<AppUser> _passwordHasher = new();
 
+    // Created on first use so a database outage doesn't crash dependency injection
+    private static readonly SemaphoreSlim IndexLock = new(1, 1);
+    private static bool _indexCreated;
+
     public UserService(IMongoDatabase database)
     {
         _users = database.GetCollection<AppUser>("Users");
+    }
 
-        var indexModel = new CreateIndexModel<AppUser>(
-            Builders<AppUser>.IndexKeys.Ascending(user => user.Email),
-            new CreateIndexOptions
+    private async Task EnsureEmailIndexAsync()
+    {
+        if (_indexCreated)
+        {
+            return;
+        }
+
+        await IndexLock.WaitAsync();
+
+        try
+        {
+            if (_indexCreated)
             {
-                Unique = true,
-                Name = "IX_Users_Email"
-            });
+                return;
+            }
 
-        _users.Indexes.CreateOne(indexModel);
+            var indexModel = new CreateIndexModel<AppUser>(
+                Builders<AppUser>.IndexKeys.Ascending(user => user.Email),
+                new CreateIndexOptions
+                {
+                    Unique = true,
+                    Name = "IX_Users_Email"
+                });
+
+            await _users.Indexes.CreateOneAsync(indexModel);
+            _indexCreated = true;
+        }
+        finally
+        {
+            IndexLock.Release();
+        }
     }
 
     public async Task<AppUser?> GetByEmailAsync(string email)
     {
+        await EnsureEmailIndexAsync();
+
         var normalizedEmail = email.Trim().ToLowerInvariant();
 
         return await _users
@@ -37,17 +66,15 @@ public class UserService
     {
         if (string.IsNullOrWhiteSpace(email))
         {
-            throw new ArgumentException(
-                "Email is required.",
-                nameof(email));
+            throw new AppValidationException("Email is required.");
         }
 
         if (string.IsNullOrWhiteSpace(password))
         {
-            throw new ArgumentException(
-                "Password is required.",
-                nameof(password));
+            throw new AppValidationException("Password is required.");
         }
+
+        await EnsureEmailIndexAsync();
 
         var user = new AppUser
         {
