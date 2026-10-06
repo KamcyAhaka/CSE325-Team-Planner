@@ -11,6 +11,7 @@
 
 @inject BoardService BoardService
 @inject ProjectService ProjectService
+@inject UiActionRunner Runner
 
 <PageTitle>Create Board</PageTitle>
 
@@ -19,20 +20,12 @@ Create a board for one of your projects." />
 
 <div class="board-page">
 
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <div class="success-banner" role="alert">
-            @successMessage
-        </div>
-    }
-
     <div class="form-card">
 
         <h2 class="form-title">Board Details</h2>
 
         <EditForm Model="@board"
                   OnValidSubmit="@CreateBoard"
-                  OnInvalidSubmit="@HandleInvalidSubmit"
                   FormName="create-board">
 
             <DataAnnotationsValidator />
@@ -58,6 +51,7 @@ Create a board for one of your projects." />
                             </option>
                         }
                     </select>
+                    <ValidationMessage For="() => board.ProjectId" />
                 </div>
 
                 <div class="form-field">
@@ -68,6 +62,7 @@ Create a board for one of your projects." />
                     <InputText id="boardName"
                                class="form-input"
                                @bind-Value="board.Name" />
+                    <ValidationMessage For="() => board.Name" />
                 </div>
 
                 <div class="form-field">
@@ -78,11 +73,10 @@ Create a board for one of your projects." />
                     <InputTextArea id="boardDescription"
                                    class="form-input form-textarea"
                                    @bind-Value="board.Description" />
+                    <ValidationMessage For="() => board.Description" />
                 </div>
 
-                <button type="submit" class="btn-submit">
-                    Create Board
-                </button>
+                <SubmitButton Text="Create Board" IsBusy="@saving" />
 
             </div>
 
@@ -92,10 +86,12 @@ Create a board for one of your projects." />
 
 </div>
 
+<ToastHost />
+
 @code {
     private List<Project> projects = new();
     private Board board = new();
-    private string successMessage = string.Empty;
+    private bool saving;
 
     protected override async Task OnInitializedAsync()
     {
@@ -104,15 +100,21 @@ Create a board for one of your projects." />
 
     private async Task CreateBoard()
     {
-        await BoardService.CreateBoardAsync(board);
+        saving = true;
+        try
+        {
+            var created = await Runner.RunAsync(
+                () => BoardService.CreateBoardAsync(board),
+                "Board created successfully!");
 
-        successMessage = "Board created successfully!";
-
-        board = new Board();
-    }
-
-    private void HandleInvalidSubmit()
-    {
-        successMessage = string.Empty;
+            if (created)
+            {
+                board = new Board();
+            }
+        }
+        finally
+        {
+            saving = false;
+        }
     }
 }

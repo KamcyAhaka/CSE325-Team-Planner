@@ -1,6 +1,6 @@
 ﻿/* Board creation page — page-specific styles only.
    Shared form components (form-card, form-title, form-field, form-label,
-   form-input, form-textarea, btn-submit, success-banner) live in app.css. */
+   form-input, form-textarea, btn-submit, validation-message) live in app.css. */
 
 .board-page {
     max-width: 800px;

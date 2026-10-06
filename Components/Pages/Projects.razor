@@ -12,6 +12,7 @@
 @using TeamProjectPlanner.Services
 
 @inject ProjectService ProjectService
+@inject UiActionRunner Runner
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Projects</PageTitle>
@@ -21,18 +22,13 @@ Create and manage your projects." />
 
 <div class="project-page">
 
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <div class="success-banner" role="alert">
-            @successMessage
-        </div>
-    }
-
     <div class="form-card">
 
         <h2 class="form-title">Create Project</h2>
 
         <EditForm Model="@project" OnValidSubmit="@CreateProject" FormName="create-project">
+
+            <DataAnnotationsValidator />
 
             <div class="form">
 
@@ -42,6 +38,7 @@ Create and manage your projects." />
                     </label>
 
                     <InputText id="projectName" class="form-input" @bind-Value="project.Name" />
+                    <ValidationMessage For="() => project.Name" />
                 </div>
 
                 <div class="form-field">
@@ -51,6 +48,7 @@ Create and manage your projects." />
 
                     <InputTextArea id="projectDescription" class="form-input form-textarea"
                                    @bind-Value="project.Description" />
+                    <ValidationMessage For="() => project.Description" />
                 </div>
 
                 <div class="project-date-row">
@@ -69,13 +67,12 @@ Create and manage your projects." />
                         </label>
 
                         <InputDate id="endDate" class="form-input" @bind-Value="project.EndDate" />
+                        <ValidationMessage For="() => project.EndDate" />
                     </div>
 
                 </div>
 
-                <button type="submit" class="btn-submit">
-                    Create Project
-                </button>
+                <SubmitButton Text="Create Project" IsBusy="@saving" />
 
             </div>
 
@@ -129,10 +126,12 @@ Create and manage your projects." />
 
 </div>
 
+<ToastHost />
+
 @code {
     private Project project = new();
     private List<Project> projects = new();
-    private string successMessage = string.Empty;
+    private bool saving;
 
     protected override async Task OnInitializedAsync()
     {
@@ -148,11 +147,22 @@ Create and manage your projects." />
 
         project.OwnerId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
 
-        await ProjectService.CreateProjectAsync(project);
+        saving = true;
+        try
+        {
+            var created = await Runner.RunAsync(
+                () => ProjectService.CreateProjectAsync(project),
+                "Project created successfully!");
 
-        successMessage = "Project created successfully!";
-
-        project = new Project();
-        projects = await ProjectService.GetProjectsAsync();
+            if (created)
+            {
+                project = new Project();
+                projects = await ProjectService.GetProjectsAsync();
+            }
+        }
+        finally
+        {
+            saving = false;
+        }
     }
 }

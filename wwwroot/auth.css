@@ -141,13 +141,6 @@
     width: 100%;
 }
 
-.field-error {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--color-error);
-    padding: 0 0.25rem;
-}
-
 .password-hint {
     font-size: 0.6875rem;
     color: var(--color-muted);
