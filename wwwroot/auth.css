@@ -3,32 +3,15 @@
    Matching WDD430 Team Project Planner UI
    ========================================================================== */
 
-:root {
-    --auth-bg: #f8fafc;
-    --auth-card: #ffffff;
-    --auth-foreground: #1e293b;
-    --auth-primary: #2563eb;
-    --auth-primary-hover: #1d4ed8;
-    --auth-border: #e2e8f0;
-    --auth-muted: #64748b;
-    --auth-error: #ef4444;
-    --auth-error-bg: rgba(239, 68, 68, 0.08);
-    --auth-error-border: rgba(239, 68, 68, 0.25);
-    --auth-success: #16a34a;
-    --auth-success-bg: rgba(34, 197, 94, 0.08);
-    --auth-success-border: rgba(34, 197, 94, 0.25);
-    --auth-illustration-bg: rgb(207, 218, 244);
-}
-
 /* Layout container */
 .auth-layout {
     display: grid;
     grid-template-columns: 1fr;
     min-height: 100vh;
     width: 100%;
-    background-color: var(--auth-bg);
+    background-color: var(--color-bg);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
     margin: 0;
     padding: 0;
 }
@@ -45,10 +28,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: var(--auth-illustration-bg);
+    background-color: var(--color-illustration-bg);
     padding: 2.5rem;
     user-select: none;
-    border-right: 1px solid var(--auth-border);
+    border-right: 1px solid var(--color-border);
 }
 
 @media (min-width: 1024px) {
@@ -89,7 +72,7 @@
     flex-direction: column;
     justify-content: center;
     padding: 2.5rem 1.5rem;
-    background-color: var(--auth-card);
+    background-color: var(--color-card);
     min-height: 100vh;
 }
 
@@ -159,7 +142,7 @@
     font-weight: 600;
     line-height: 1.75rem;
     letter-spacing: -0.015em;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
     margin: 0;
 }
 
@@ -184,8 +167,8 @@
     font-size: 0.875rem;
     font-family: inherit;
     color: #0f172a;
-    background-color: var(--auth-card);
-    border: 1px solid var(--auth-border);
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
     border-radius: 0.5rem;
     box-sizing: border-box;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -197,16 +180,16 @@
 
 .form-input:focus {
     outline: none;
-    border-color: var(--auth-primary);
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .form-input.input-error {
-    border-color: var(--auth-error);
+    border-color: var(--color-error);
 }
 
 .form-input.input-error:focus {
-    border-color: var(--auth-error);
+    border-color: var(--color-error);
     box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
 
@@ -219,13 +202,13 @@
 .field-error {
     font-size: 0.75rem;
     font-weight: 500;
-    color: var(--auth-error);
+    color: var(--color-error);
     padding: 0 0.25rem;
 }
 
 .password-hint {
     font-size: 0.6875rem;
-    color: var(--auth-muted);
+    color: var(--color-muted);
     line-height: 1.35;
     margin: 0;
     padding: 0 0.25rem;
@@ -239,14 +222,14 @@
 
 .forgot-password-link {
     font-size: 0.75rem;
-    color: var(--auth-primary);
+    color: var(--color-primary);
     font-weight: 500;
     text-decoration: none;
     transition: color 0.15s ease;
 }
 
 .forgot-password-link:hover {
-    color: var(--auth-primary-hover);
+    color: var(--color-primary-hover);
     text-decoration: underline;
 }
 
@@ -263,7 +246,7 @@
     font-weight: 600;
     font-family: inherit;
     color: #ffffff;
-    background-color: var(--auth-primary);
+    background-color: var(--color-primary);
     border: none;
     border-radius: 0.5rem;
     cursor: pointer;
@@ -272,7 +255,7 @@
 }
 
 .btn-submit:hover:not(:disabled) {
-    background-color: var(--auth-primary-hover);
+    background-color: var(--color-primary-hover);
     box-shadow: 0 2px 4px 0 rgba(37, 99, 235, 0.25);
 }
 
@@ -298,15 +281,15 @@
 }
 
 .alert-error {
-    background-color: var(--auth-error-bg);
-    border: 1px solid var(--auth-error-border);
-    color: var(--auth-error);
+    background-color: var(--color-error-bg);
+    border: 1px solid var(--color-error-border);
+    color: var(--color-error);
 }
 
 .alert-success {
-    background-color: var(--auth-success-bg);
-    border: 1px solid var(--auth-success-border);
-    color: var(--auth-success);
+    background-color: var(--color-success-bg);
+    border: 1px solid var(--color-success-border);
+    color: var(--color-success);
 }
 
 .alert-icon {
@@ -319,18 +302,18 @@
 .auth-footer {
     text-align: center;
     font-size: 0.875rem;
-    color: var(--auth-muted);
+    color: var(--color-muted);
 }
 
 .auth-link {
-    color: var(--auth-primary);
+    color: var(--color-primary);
     font-weight: 500;
     text-decoration: none;
     transition: color 0.15s ease;
 }
 
 .auth-link:hover {
-    color: var(--auth-primary-hover);
+    color: var(--color-primary-hover);
     text-decoration: underline;
 }
 

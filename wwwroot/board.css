@@ -10,27 +10,27 @@
 
 .board-page-title {
     margin: 0 0 0.5rem;
-    color: #1e293b;
+    color: var(--color-foreground);
     font-size: 2rem;
     font-weight: 700;
 }
 
 .board-page-subtitle {
     margin: 0;
-    color: #64748b;
+    color: var(--color-muted);
 }
 
 .board-form-card {
     padding: 2rem;
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
     border-radius: 0.75rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .board-form-title {
     margin: 0 0 1.5rem;
-    color: #1e293b;
+    color: var(--color-foreground);
     font-size: 1.25rem;
     font-weight: 600;
 }
@@ -58,9 +58,9 @@
     min-height: 2.625rem;
     padding: 0.5rem 0.875rem;
     box-sizing: border-box;
-    color: #0f172a;
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    color: var(--color-foreground);
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
     border-radius: 0.5rem;
     font-family: inherit;
     font-size: 0.875rem;
@@ -69,7 +69,7 @@
 
 .board-form-input:focus {
     outline: none;
-    border-color: #2563eb;
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
@@ -80,16 +80,16 @@
 
 .board-validation {
     margin: 0;
-    color: #ef4444;
+    color: var(--color-error);
     font-size: 0.875rem;
 }
 
 .board-success {
     margin-bottom: 1.5rem;
     padding: 0.75rem 1rem;
-    color: #16a34a;
-    background-color: rgba(34, 197, 94, 0.08);
-    border: 1px solid rgba(34, 197, 94, 0.25);
+    color: var(--color-success);
+    background-color: var(--color-success-bg);
+    border: 1px solid var(--color-success-border);
     border-radius: 0.5rem;
 }
 
@@ -98,7 +98,7 @@
     min-height: 2.625rem;
     padding: 0 1.25rem;
     color: #ffffff;
-    background-color: #2563eb;
+    background-color: var(--color-primary);
     border: none;
     border-radius: 0.5rem;
     font-family: inherit;
@@ -109,7 +109,7 @@
 }
 
 .board-submit:hover {
-    background-color: #1d4ed8;
+    background-color: var(--color-primary-hover);
     box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
 }
 

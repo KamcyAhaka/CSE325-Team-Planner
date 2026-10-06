@@ -23,7 +23,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem 3rem;
-    border-bottom: 1px solid var(--auth-border);
+    border-bottom: 1px solid var(--color-border);
     background: rgba(255, 255, 250, 0.6);
     position: sticky;
     top: 0;
@@ -46,7 +46,7 @@
 .home-brand-name {
     font-weight: 800;
     font-size: 1rem;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
 }
 
 .home-nav {
@@ -87,17 +87,17 @@
 }
 
 .home-btn-primary {
-    background-color: var(--auth-primary);
+    background-color: var(--color-primary);
     color: #fff;
 }
 
 .home-btn-primary:hover {
-    background-color: var(--auth-primary-hover);
+    background-color: var(--color-primary-hover);
 }
 
 .home-btn-ghost {
     background: transparent;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
 }
 
 .home-btn-ghost:hover {
@@ -106,8 +106,8 @@
 
 .home-btn-outline {
     background: #fff;
-    color: var(--auth-foreground);
-    border: 1px solid var(--auth-border);
+    color: var(--color-foreground);
+    border: 1px solid var(--color-border);
     box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
 }
 
@@ -161,7 +161,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--auth-primary);
+    color: var(--color-primary);
     background: rgba(37, 99, 235, 0.1);
     border-radius: 9999px;
     padding: 0.25rem 0.75rem;
@@ -178,7 +178,7 @@
     font-weight: 800;
     line-height: 1.1;
     letter-spacing: -0.025em;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
     max-width: 56rem;
 }
 
@@ -194,7 +194,7 @@
     max-width: 48rem;
     font-size: 1.25rem;
     line-height: 1.625;
-    color: var(--auth-muted);
+    color: var(--color-muted);
 }
 
 /* CTA row */
@@ -223,8 +223,8 @@
 }
 
 .home-feature-card {
-    background: var(--auth-card);
-    border: 1px solid var(--auth-border);
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
     border-radius: 1.125rem;
     padding: 1.5rem;
     box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
@@ -265,23 +265,23 @@
     font-weight: 700;
     line-height: 1.556;
     margin-bottom: 0.5rem;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
 }
 
 .home-feature-text {
     font-size: 0.875rem;
     line-height: 1.625;
-    color: var(--auth-muted);
+    color: var(--color-muted);
 }
 
 /* Footer */
 .home-footer {
-    border-top: 1px solid var(--auth-border);
+    border-top: 1px solid var(--color-border);
     background: rgba(255, 255, 250, 0.4);
     padding: 1.5rem 0;
     text-align: center;
     font-size: 0.75rem;
-    color: var(--auth-muted);
+    color: var(--color-muted);
 }
 
 /* Mobile adjustments */
