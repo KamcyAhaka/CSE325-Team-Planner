@@ -1,5 +1,7 @@
 @page "/projects"
+
 @rendermode InteractiveServer
+
 @attribute [Authorize]
 
 @using System.Security.Claims
@@ -7,97 +9,143 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using TeamProjectPlanner.Models
 @using TeamProjectPlanner.Services
+
 @inject ProjectService ProjectService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Projects</PageTitle>
 
-<h1>Projects</h1>
+<div class="project-page">
 
-<p>Create and manage your projects.</p>
+    <div class="project-page-header">
+        <h1 class="project-page-title">Projects</h1>
 
-<div class="card p-4 mt-4">
-    <h2>Create Project</h2>
+        <p class="project-page-subtitle">
+            Create and manage your projects.
+        </p>
+    </div>
 
-    <EditForm Model="@project"
-              OnValidSubmit="@CreateProject"
-              FormName="create-project">
-
-        <div class="mb-3">
-            <label for="projectName" class="form-label">Project Name</label>
-            <InputText id="projectName"
-                       class="form-control"
-                       @bind-Value="project.Name" />
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="project-success" role="alert">
+            @successMessage
         </div>
+    }
 
-        <div class="mb-3">
-            <label for="projectDescription" class="form-label">Description</label>
-            <InputTextArea id="projectDescription"
-                           class="form-control"
-                           @bind-Value="project.Description" />
-        </div>
+    <div class="project-form-card">
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="startDate" class="form-label">Start Date</label>
-                <InputDate id="startDate"
-                           class="form-control"
-                           @bind-Value="project.StartDate" />
+        <h2 class="project-form-title">Create Project</h2>
+
+        <EditForm Model="@project"
+                  OnValidSubmit="@CreateProject"
+                  FormName="create-project">
+
+            <div class="project-form">
+
+                <div class="project-form-field">
+                    <label for="projectName" class="project-form-label">
+                        Project Name
+                    </label>
+
+                    <InputText id="projectName"
+                               class="project-form-input"
+                               @bind-Value="project.Name" />
+                </div>
+
+                <div class="project-form-field">
+                    <label for="projectDescription" class="project-form-label">
+                        Description
+                    </label>
+
+                    <InputTextArea id="projectDescription"
+                                   class="project-form-input project-form-textarea"
+                                   @bind-Value="project.Description" />
+                </div>
+
+                <div class="project-date-row">
+
+                    <div class="project-form-field">
+                        <label for="startDate" class="project-form-label">
+                            Start Date
+                        </label>
+
+                        <InputDate id="startDate"
+                                   class="project-form-input"
+                                   @bind-Value="project.StartDate" />
+                    </div>
+
+                    <div class="project-form-field">
+                        <label for="endDate" class="project-form-label">
+                            End Date
+                        </label>
+
+                        <InputDate id="endDate"
+                                   class="project-form-input"
+                                   @bind-Value="project.EndDate" />
+                    </div>
+
+                </div>
+
+                <button type="submit" class="project-submit">
+                    Create Project
+                </button>
+
             </div>
 
-            <div class="col-md-6 mb-3">
-                <label for="endDate" class="form-label">End Date</label>
-                <InputDate id="endDate"
-                           class="form-control"
-                           @bind-Value="project.EndDate" />
-            </div>
-        </div>
+        </EditForm>
 
-        <button type="submit" class="btn btn-primary">
-            Create Project
-        </button>
-    </EditForm>
-</div>
+    </div>
 
-@if (projects.Count > 0)
-{
-    <div class="mt-4">
-        <h2>Projects</h2>
+    @if (projects.Count > 0)
+    {
+        <div class="project-list">
 
-        <div class="row">
-            @foreach (var item in projects)
-            {
-                <div class="col-md-6 mb-3">
-                    <div class="card p-3 h-100">
-                        <h3>@item.Name</h3>
+            <h2 class="project-list-title">Projects</h2>
 
-                        <p>@item.Description</p>
+            <div class="project-grid">
 
-                        <p class="mb-1">
+                @foreach (var item in projects)
+                {
+                    <div class="project-card">
+
+                        <h3 class="project-card-title">
+                            @item.Name
+                        </h3>
+
+                        <p class="project-card-description">
+                            @item.Description
+                        </p>
+
+                        <p class="project-card-date">
                             <strong>Start:</strong>
                             @item.StartDate.ToString("MMM dd, yyyy")
                         </p>
 
-                        <p>
+                        <p class="project-card-date">
                             <strong>End:</strong>
                             @item.EndDate.ToString("MMM dd, yyyy")
                         </p>
+
                     </div>
-                </div>
-            }
+                }
+
+            </div>
+
         </div>
-    </div>
-}
-else
-{
-    <div class="mt-4">
-        <p>No projects have been created yet.</p>
-    </div>
-}
+    }
+    else
+    {
+        <div class="project-empty">
+            No projects have been created yet.
+        </div>
+    }
+
+</div>
 
 @code {
     private Project project = new();
     private List<Project> projects = new();
+    private string successMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -114,6 +162,8 @@ else
         project.OwnerId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
 
         await ProjectService.CreateProjectAsync(project);
+
+        successMessage = "Project created successfully!";
 
         project = new Project();
         projects = await ProjectService.GetProjectsAsync();
