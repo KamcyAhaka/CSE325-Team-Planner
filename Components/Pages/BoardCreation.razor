@@ -21,14 +21,14 @@ Create a board for one of your projects." />
 
     @if (!string.IsNullOrEmpty(successMessage))
     {
-        <div class="board-success" role="alert">
+        <div class="success-banner" role="alert">
             @successMessage
         </div>
     }
 
-    <div class="board-form-card">
+    <div class="form-card">
 
-        <h2 class="board-form-title">Board Details</h2>
+        <h2 class="form-title">Board Details</h2>
 
         <EditForm Model="@board"
                   OnValidSubmit="@CreateBoard"
@@ -37,17 +37,17 @@ Create a board for one of your projects." />
 
             <DataAnnotationsValidator />
 
-            <div class="board-form">
+            <div class="form">
 
                 <ValidationSummary class="board-validation" />
 
-                <div class="board-form-field">
-                    <label for="project" class="board-form-label">
+                <div class="form-field">
+                    <label for="project" class="form-label">
                         Project
                     </label>
 
                     <select id="project"
-                            class="board-form-input"
+                            class="form-input"
                             @bind="board.ProjectId">
                         <option value="">Select a project</option>
 
@@ -60,27 +60,27 @@ Create a board for one of your projects." />
                     </select>
                 </div>
 
-                <div class="board-form-field">
-                    <label for="boardName" class="board-form-label">
+                <div class="form-field">
+                    <label for="boardName" class="form-label">
                         Board Name
                     </label>
 
                     <InputText id="boardName"
-                               class="board-form-input"
+                               class="form-input"
                                @bind-Value="board.Name" />
                 </div>
 
-                <div class="board-form-field">
-                    <label for="boardDescription" class="board-form-label">
+                <div class="form-field">
+                    <label for="boardDescription" class="form-label">
                         Description
                     </label>
 
                     <InputTextArea id="boardDescription"
-                                   class="board-form-input board-form-textarea"
+                                   class="form-input form-textarea"
                                    @bind-Value="board.Description" />
                 </div>
 
-                <button type="submit" class="board-submit">
+                <button type="submit" class="btn-submit">
                     Create Board
                 </button>
 

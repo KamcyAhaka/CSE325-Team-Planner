@@ -296,11 +296,6 @@
     mask-image: url("icons/calendar.svg");
 }
 
-.icon-layers {
-    -webkit-mask-image: url("icons/layers.svg");
-    mask-image: url("icons/layers.svg");
-}
-
 .icon-arrow-right {
     -webkit-mask-image: url("icons/arrow-right.svg");
     mask-image: url("icons/arrow-right.svg");
