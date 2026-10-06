@@ -1,12 +1,247 @@
 @page "/dashboard"
-@attribute [Authorize]
+@using System.Globalization
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @layout Layout.DashboardLayout
-@using Microsoft.AspNetCore.Authorization
+@inject ProjectService ProjectService
+@inject TaskService TaskService
+@inject ProjectMemberService ProjectMemberService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Dashboard</PageTitle>
 
-<DashboardHeader Title="Dashboard" Subtitle="Overview of your projects and tasks." />
+<DashboardHeader Title="Dashboard" Subtitle="Welcome back to your workspace!" />
 
-<div>
-    <p>Dashboard content will be built here.</p>
+<div class="dashboard-content">
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+        <div class="hero-circle hero-circle-top"></div>
+        <div class="hero-circle hero-circle-bottom"></div>
+        <p class="hero-date">@TodayDate</p>
+        <h2 class="hero-title">@Greeting, @DisplayName!</h2>
+        <p class="hero-text">Here is what is happening with your projects today. You have
+            <strong class="hero-count">@ActiveTaskCount</strong> active tasks and
+            <strong class="hero-count">@UrgentDeadlineCount</strong> urgent deadlines.</p>
+    </section>
+
+    <!-- Stats Grid -->
+    <section class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-primary"><span class="icon icon-folder"></span></div>
+            <div class="stat-info">
+                <span class="stat-label">Projects</span>
+                <span class="stat-value">@ProjectCount</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-blue"><span class="icon icon-square-check"></span></div>
+            <div class="stat-info">
+                <span class="stat-label">Assigned Tasks</span>
+                <span class="stat-value">@AssignedTaskCount</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-success"><span class="icon icon-user-check"></span></div>
+            <div class="stat-info">
+                <span class="stat-label">Completed Tasks</span>
+                <span class="stat-value">@CompletedTaskCount</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-error"><span class="icon icon-triangle-alert pulse"></span></div>
+            <div class="stat-info">
+                <span class="stat-label">Urgent / Overdue</span>
+                <span class="stat-value">@UrgentDeadlineCount</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+
+        <!-- Recent Projects -->
+        <section class="content-col content-col-main">
+            <div class="section-header">
+                <h3 class="section-title">Recent Projects</h3>
+                <a href="/projects" class="view-all-link">View All Projects <span class="icon icon-arrow-right icon-xs"></span></a>
+            </div>
+
+            @if (ProjectSummaries.Count == 0)
+            {
+                <div class="empty-state">
+                    <span class="icon icon-folder empty-icon"></span>
+                    <p>No projects yet. Create your first project to get started.</p>
+                </div>
+            }
+            else
+            {
+                <div class="projects-grid">
+                    @foreach (var summary in ProjectSummaries)
+                    {
+                        var p = summary.Project;
+                        <article class="project-card">
+                            <div class="project-card-top">
+                                <span class="project-badge">@GetProjectStatus(p)</span>
+                                <span class="project-date"><span class="icon icon-calendar icon-xs"></span>@(p.EndDate.ToString("M/d/yyyy"))</span>
+                            </div>
+                            <h4 class="project-name" title="@p.Name">@p.Name</h4>
+                            <p class="project-desc" title="@(p.Description ?? "")">@(string.IsNullOrWhiteSpace(p.Description) ? "No description provided." : p.Description)</p>
+                            <div class="project-card-bottom">
+                                <div class="progress-row">
+                                    <span class="progress-label">Task Completion</span>
+                                    <span class="progress-value">@summary.CompletionPct%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: @summary.CompletionPct%;"></div>
+                                </div>
+                                <div class="project-footer">
+                                    <span class="member-count"><strong>@summary.MemberCount</strong> member@(summary.MemberCount == 1 ? "" : "s")</span>
+                                    <a href="/projects/@p.Id" class="view-workspace-link">View Workspace <span class="icon icon-arrow-right icon-sm"></span></a>
+                                </div>
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </section>
+
+        <!-- My Tasks -->
+        <section class="content-col">
+            <div class="section-header">
+                <h3 class="section-title">My Tasks</h3>
+                <span class="my-tasks-badge">@PendingTaskCount Pending</span>
+            </div>
+
+            @if (MyTasks.Count == 0)
+            {
+                <div class="task-empty">
+                    <span class="icon icon-square-check empty-icon"></span>
+                    <p>No tasks assigned to you.</p>
+                </div>
+            }
+            else
+            {
+                <ul class="task-list">
+                    @foreach (var task in MyTasks)
+                    {
+                        <li class="task-item">
+                            <div class="task-item-main">
+                                <span class="task-title" title="@task.Title">@task.Title</span>
+                                <span class="task-meta">
+                                    <span>@GetProjectName(task.ProjectId)</span>
+                                    @if (task.DueDate.HasValue)
+                                    {
+                                        <span class="@(IsOverdue(task) ? "task-due task-due-overdue" : "task-due")">
+                                            <span class="icon icon-calendar icon-xs"></span>@(task.DueDate.Value.ToString("M/d/yyyy"))
+                                        </span>
+                                    }
+                                </span>
+                            </div>
+                            <span class="task-status task-status-@GetStatusClass(task.Status)">@GetStatusLabel(task.Status)</span>
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+
+    </div>
 </div>
+
+@code {
+    private string _userId = "";
+    private string DisplayName = "";
+    private string TodayDate = "";
+    private string Greeting = "Good day";
+
+    private List<ProjectSummary> ProjectSummaries = new();
+    private List<ProjectTask> MyTasks = new();
+    private Dictionary<string, string> _projectNames = new();
+
+    private int ProjectCount => ProjectSummaries.Count;
+    private int ActiveTaskCount => MyTasks.Count(t => t.Status != ProjectTaskStatus.Done);
+    private int AssignedTaskCount => ActiveTaskCount;
+    private int CompletedTaskCount = 0;
+    private int UrgentDeadlineCount = 0;
+    private int PendingTaskCount = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        _userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+        DisplayName = authState.User.Identity?.Name
+            ?? authState.User.FindFirst(ClaimTypes.Name)?.Value
+            ?? "there";
+
+        var now = DateTime.Now;
+        TodayDate = now.ToString("dddd, MMMM d, yyyy", new CultureInfo("en-US"));
+        int hour = now.Hour;
+        Greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+
+        var projects = await ProjectService.GetProjectsAsync();
+        var today = DateTime.Today;
+
+        foreach (var project in projects)
+        {
+            _projectNames[project.Id] = project.Name;
+
+            var tasks = await TaskService.GetTasksByProjectAsync(project.Id);
+            int done = tasks.Count(t => t.Status == ProjectTaskStatus.Done);
+            int pct = tasks.Count > 0 ? (int)Math.Round(done * 100.0 / tasks.Count) : 0;
+
+            var members = await ProjectMemberService.GetMembersByProjectAsync(project.Id);
+
+            ProjectSummaries.Add(new ProjectSummary
+            {
+                Project = project,
+                CompletionPct = pct,
+                MemberCount = members.Count
+            });
+
+            foreach (var task in tasks.Where(t => t.OwnerId == _userId))
+            {
+                MyTasks.Add(task);
+                if (task.Status != ProjectTaskStatus.Done)
+                {
+                    PendingTaskCount++;
+                    if (task.DueDate.HasValue && task.DueDate.Value.Date <= today)
+                        UrgentDeadlineCount++;
+                }
+            }
+        }
+
+        CompletedTaskCount = MyTasks.Count(t => t.Status == ProjectTaskStatus.Done);
+    }
+
+    private string GetProjectStatus(Project p)
+    {
+        var now = DateTime.Now;
+        if (p.EndDate < now) return "completed";
+        if (p.StartDate > now) return "planning";
+        return "active";
+    }
+
+    private string GetProjectName(string projectId) =>
+        _projectNames.TryGetValue(projectId, out var name) ? name : "Unknown project";
+
+    private bool IsOverdue(ProjectTask task) =>
+        task.DueDate.HasValue && task.DueDate.Value < DateTime.Now && task.Status != ProjectTaskStatus.Done;
+
+    private string GetStatusClass(ProjectTaskStatus status) => status switch
+    {
+        ProjectTaskStatus.ToDo => "todo",
+        ProjectTaskStatus.InProgress => "inprogress",
+        _ => "done"
+    };
+
+    private string GetStatusLabel(ProjectTaskStatus status) =>
+        status == ProjectTaskStatus.Done ? "Done" : status.ToString();
+
+    private class ProjectSummary
+    {
+        public Project Project { get; set; } = null!;
+        public int CompletionPct { get; set; }
+        public int MemberCount { get; set; }
+    }
+}
