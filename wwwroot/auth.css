@@ -166,7 +166,7 @@
     padding: 0.5rem 0.875rem;
     font-size: 0.875rem;
     font-family: inherit;
-    color: #0f172a;
+    color: var(--color-foreground);
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
     border-radius: 0.5rem;
@@ -175,13 +175,13 @@
 }
 
 .form-input::placeholder {
-    color: #94a3b8;
+    color: var(--color-disabled);
 }
 
 .form-input:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    box-shadow: 0 0 0 3px var(--color-primary-subtle);
 }
 
 .form-input.input-error {
@@ -194,8 +194,8 @@
 }
 
 .form-input:disabled {
-    background-color: #f8fafc;
-    color: #94a3b8;
+    background-color: var(--color-bg);
+    color: var(--color-disabled);
     cursor: not-allowed;
 }
 
@@ -256,7 +256,7 @@
 
 .btn-submit:hover:not(:disabled) {
     background-color: var(--color-primary-hover);
-    box-shadow: 0 2px 4px 0 rgba(37, 99, 235, 0.25);
+    box-shadow: 0 2px 4px 0 var(--color-primary-medium);
 }
 
 .btn-submit:active:not(:disabled) {
