@@ -123,7 +123,7 @@ app.MapPost("/api/auth/login", async (
         return Results.Redirect(redirectUrl);
     }
 
-    return Results.Redirect(string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl);
+    return Results.Redirect(string.IsNullOrWhiteSpace(returnUrl) ? "/dashboard" : returnUrl);
 }).DisableAntiforgery();
 
 app.MapGet("/api/auth/logout", async (AuthService authService) =>

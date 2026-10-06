@@ -1,5 +1,7 @@
 @page "/"
 @layout Layout.EmptyLayout
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Team Project Planner - Organize, Assign, and Track Your Group Projects</PageTitle>
 
@@ -12,8 +14,15 @@
             <span class="home-brand-name">Team Planner</span>
         </div>
         <nav class="home-nav" aria-label="Authentication">
-            <a href="/auth/sign-in" class="home-btn home-btn-ghost">Sign In</a>
-            <a href="/auth/sign-up" class="home-btn home-btn-primary">Sign Up</a>
+            @if (isAuthenticated)
+            {
+                <a href="/dashboard" class="home-btn home-btn-primary">Dashboard</a>
+            }
+            else
+            {
+                <a href="/auth/sign-in" class="home-btn home-btn-ghost">Sign In</a>
+                <a href="/auth/sign-up" class="home-btn home-btn-primary">Sign Up</a>
+            }
         </nav>
     </header>
 
@@ -43,17 +52,33 @@
             </p>
         </div>
 
-        <div class="home-cta-row">
-            <a href="/auth/sign-up" class="home-btn home-btn-primary home-btn-lg">
-                Get Started
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M5 12h14" />
-                    <path d="m12 5 7 7-7 7" />
-                </svg>
-            </a>
-            <a href="/auth/sign-in" class="home-btn home-btn-outline home-btn-lg">Sign In to Workspace</a>
-        </div>
+        @if (isAuthenticated)
+        {
+            <div class="home-cta-row">
+                <a href="/dashboard" class="home-btn home-btn-primary home-btn-lg">
+                    Go to Dashboard
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="home-cta-row">
+                <a href="/auth/sign-up" class="home-btn home-btn-primary home-btn-lg">
+                    Get Started
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                    </svg>
+                </a>
+                <a href="/auth/sign-in" class="home-btn home-btn-outline home-btn-lg">Sign In to Workspace</a>
+            </div>
+        }
 
         <!-- Feature cards -->
         <div class="home-features">
@@ -110,3 +135,13 @@
     </footer>
 
 </div>
+
+@code {
+    private bool isAuthenticated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        isAuthenticated = authState.User.Identity?.IsAuthenticated == true;
+    }
+}
