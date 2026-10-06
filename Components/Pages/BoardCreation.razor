@@ -1,4 +1,5 @@
 @page "/boards/create"
+@layout Layout.DashboardLayout
 
 @rendermode InteractiveServer
 
@@ -13,15 +14,10 @@
 
 <PageTitle>Create Board</PageTitle>
 
+<DashboardHeader Title="Create Board" Subtitle="
+Create a board for one of your projects." />
+
 <div class="board-page">
-
-    <div class="board-page-header">
-        <h1 class="board-page-title">Create Board</h1>
-
-        <p class="board-page-subtitle">
-            Create a board for one of your projects.
-        </p>
-    </div>
 
     @if (!string.IsNullOrEmpty(successMessage))
     {
