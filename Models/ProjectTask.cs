@@ -26,7 +26,6 @@ public class ProjectTask
     [StringLength(2000, ErrorMessage = "Task description cannot exceed 2000 characters.")]
     public string Description { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Task project is required.")]
     public string ProjectId { get; set; } = string.Empty;
 
     public string OwnerId { get; set; } = string.Empty;

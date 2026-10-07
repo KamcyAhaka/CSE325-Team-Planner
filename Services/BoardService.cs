@@ -26,4 +26,18 @@ public class BoardService
             .Find(board => board.ProjectId == projectId)
             .ToListAsync();
     }
+
+    public async Task<Board?> GetBoardByIdAsync(string boardId)
+    {
+        if (string.IsNullOrWhiteSpace(boardId))
+        {
+            throw new ArgumentException(
+                "Board id is required.",
+                nameof(boardId));
+        }
+
+        return await _boards
+            .Find(board => board.Id == boardId)
+            .FirstOrDefaultAsync();
+    }
 }

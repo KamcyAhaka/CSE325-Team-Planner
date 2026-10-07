@@ -1,0 +1,206 @@
+@page "/boards/{boardId}"
+
+@rendermode InteractiveServer
+
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using TeamProjectPlanner.Models
+@using TeamProjectPlanner.Services
+
+@inject BoardService BoardService
+@inject TaskService TaskService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Board Workspace</PageTitle>
+
+<h1>Board Workspace</h1>
+
+@if (boardNotFound)
+{
+    <p>Board not found.</p>
+}
+else if (board is null)
+{
+    <p>Loading board...</p>
+}
+else
+{
+    <h2>@board.Name</h2>
+    <p>@board.Description</p>
+
+    <h3>Create Task</h3>
+
+    <EditForm Model="@newTask" OnValidSubmit="@CreateTask">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div>
+            <label for="taskTitle">Task Title</label>
+            <InputText id="taskTitle"
+                       @bind-Value="newTask.Title" />
+        </div>
+
+        <div>
+            <label for="taskDescription">Description</label>
+            <InputTextArea id="taskDescription"
+                           @bind-Value="newTask.Description" />
+        </div>
+
+        <div>
+            <label for="taskDueDate">Due Date</label>
+            <InputDate id="taskDueDate"
+                       @bind-Value="newTask.DueDate" />
+        </div>
+
+        <button type="submit">
+            Create Task
+        </button>
+    </EditForm>
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <p role="alert">@successMessage</p>
+    }
+
+    <h3>Tasks</h3>
+
+    <div>
+        <section>
+            <h4>To Do</h4>
+
+            @foreach (var task in tasks.Where(t => t.Status == ProjectTaskStatus.ToDo))
+            {
+                <div>
+                    <strong>@task.Title</strong>
+                    <p>@task.Description</p>
+
+                    <button type="button"
+                            @onclick="() => UpdateTaskStatus(task.Id, ProjectTaskStatus.InProgress)">
+                        Move to In Progress
+                    </button>
+
+                    <button type="button"
+                            @onclick="() => UpdateTaskStatus(task.Id, ProjectTaskStatus.Done)">
+                        Move to Done
+                    </button>
+                </div>
+            }
+        </section>
+
+        <section>
+            <h4>In Progress</h4>
+
+            @foreach (var task in tasks.Where(t => t.Status == ProjectTaskStatus.InProgress))
+            {
+                <div>
+                    <strong>@task.Title</strong>
+                    <p>@task.Description</p>
+
+                    <button type="button"
+                            @onclick="() => UpdateTaskStatus(task.Id, ProjectTaskStatus.ToDo)">
+                        Move to To Do
+                    </button>
+
+                    <button type="button"
+                            @onclick="() => UpdateTaskStatus(task.Id, ProjectTaskStatus.Done)">
+                        Move to Done
+                    </button>
+                </div>
+            }
+        </section>
+
+        <section>
+            <h4>Done</h4>
+
+            @foreach (var task in tasks.Where(t => t.Status == ProjectTaskStatus.Done))
+            {
+                <div>
+                    <strong>@task.Title</strong>
+                    <p>@task.Description</p>
+
+                    <button type="button"
+                            @onclick="() => UpdateTaskStatus(task.Id, ProjectTaskStatus.ToDo)">
+                        Move to To Do
+                    </button>
+
+                    <button type="button"
+                            @onclick="() => UpdateTaskStatus(task.Id, ProjectTaskStatus.InProgress)">
+                        Move to In Progress
+                    </button>
+                </div>
+            }
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string boardId { get; set; } = string.Empty;
+
+    private Board? board;
+    private List<ProjectTask> tasks = new();
+    private bool boardNotFound;
+    private ProjectTask newTask = new();
+    private string _userId = string.Empty;
+    private string successMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        _userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? string.Empty;
+
+        board = await BoardService.GetBoardByIdAsync(boardId);
+
+        if (board is null)
+        {
+            boardNotFound = true;
+        }
+        else
+        {
+            await LoadTasks();
+        }
+    }
+
+    private async Task LoadTasks()
+    {
+        if (board is not null)
+        {
+            tasks = await TaskService.GetTasksByProjectAsync(board.ProjectId);
+        }
+    }
+
+    private async Task CreateTask()
+    {
+        if (board is null)
+        {
+            return;
+        }
+
+        newTask.ProjectId = board.ProjectId;
+        newTask.OwnerId = _userId;
+        newTask.Status = ProjectTaskStatus.ToDo;
+
+        await TaskService.CreateTaskAsync(newTask);
+
+        successMessage = "Task created successfully!";
+
+        newTask = new ProjectTask();
+
+        await LoadTasks();
+    }
+
+    private async Task UpdateTaskStatus(
+        string taskId,
+        ProjectTaskStatus status)
+    {
+        await TaskService.UpdateTaskStatusAsync(taskId, status);
+
+        await LoadTasks();
+    }
+}
