@@ -127,7 +127,7 @@ Create and manage your projects." />
 <ToastHost />
 
 @code {
-    private Project project = new();
+    private Project project = new() { StartDate = DateTime.Today, EndDate = DateTime.Today.AddMonths(1) };
     private List<Project> projects = new();
     private bool saving;
 
@@ -160,9 +160,9 @@ Create and manage your projects." />
 
             if (created)
             {
-                project = new Project();
-                projects = await ProjectService
-                    .GetProjectsForUserAsync(project.OwnerId);
+                var ownerId = project.OwnerId;
+                project = new Project { StartDate = DateTime.Today, EndDate = DateTime.Today.AddMonths(1) };
+                projects = await ProjectService.GetProjectsForUserAsync(ownerId);
             }
         }
         finally
