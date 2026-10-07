@@ -1,0 +1,412 @@
+@page "/projects/{projectId}"
+
+@layout DashboardLayout
+
+@rendermode InteractiveServer
+
+@attribute [Authorize]
+
+@using System.Security.Claims
+
+@inject ProjectService ProjectService
+@inject TaskService TaskService
+@inject ProjectMemberService ProjectMemberService
+@inject UserService UserService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UiActionRunner Runner
+
+<PageTitle>Project Workspace</PageTitle>
+
+<DashboardHeader Title="Project Workspace" Subtitle="Manage the tasks and team for this project." />
+
+<div class="project-workspace">
+    @if (notFound)
+    {
+        <div class="project-empty">Project not found.</div>
+    }
+    else if (noAccess)
+    {
+        <div class="project-empty">You don't have access to this project.</div>
+    }
+    else if (project is null)
+    {
+        <div class="project-empty">Loading project...</div>
+    }
+    else
+    {
+        <div class="workspace-top-row">
+            <a href="/dashboard" class="back-link">
+                <span class="icon icon-arrow-left icon-sm"></span>
+                Back to Dashboard
+            </a>
+
+            <a href="/boards/create?projectId=@project.Id" class="view-all-link">
+                <span class="icon icon-plus icon-sm"></span>
+                Create Board
+            </a>
+        </div>
+
+        <div class="project-header-card">
+            <div class="project-header-main">
+                <div class="project-header-meta">
+                    <span class="project-badge">@GetProjectStatus(project)</span>
+
+                    <span class="project-date">
+                        <span class="icon icon-calendar icon-xs"></span>
+                        Due @project.EndDate.ToString("M/d/yyyy")
+                    </span>
+                </div>
+
+                <h2>@project.Name</h2>
+                <p class="project-header-desc">@project.Description</p>
+            </div>
+
+            <div class="project-header-side">
+                <span class="project-members-label">
+                    Team Members (@team.Count)
+                </span>
+
+                <div class="project-members">
+                    @foreach (var person in team)
+                    {
+                        var name = GetUserName(person.UserId);
+
+                        <span class="avatar avatar-sm"
+                              title="@name (@person.Role)">
+                            @UserInfo.GetInitials(name)
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="workspace-stats">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-primary">
+                    <span class="icon icon-square-check"></span>
+                </div>
+
+                <div class="stat-info">
+                    <span class="stat-label">Project Progress</span>
+                    <span class="stat-value">@ProgressPercent% Complete</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-blue">
+                    <span class="icon icon-folder"></span>
+                </div>
+
+                <div class="stat-info">
+                    <span class="stat-label">Total Tasks</span>
+                    <span class="stat-value">@tasks.Count Active: @ActiveCount</span>
+                </div>
+            </div>
+        </div>
+
+        <section class="task-board-section">
+            <div class="section-header">
+                <h3 class="section-title">Task Board</h3>
+            </div>
+
+            <EditForm Model="@newTask"
+                      OnValidSubmit="@CreateTask"
+                      FormName="create-task"
+                      Class="form-card board-task-form">
+
+                <DataAnnotationsValidator />
+
+                <div class="form">
+                    <h2 class="form-title">Create Task</h2>
+
+                    <ValidationSummary class="form-validation" />
+
+                    <div class="form-field">
+                        <label for="taskTitle" class="form-label">Task Title</label>
+                        <InputText id="taskTitle"
+                                   class="form-input"
+                                   @bind-Value="newTask.Title" />
+                        <ValidationMessage For="() => newTask.Title" />
+                    </div>
+
+                    <div class="form-field">
+                        <label for="taskDescription" class="form-label">Description</label>
+                        <InputTextArea id="taskDescription"
+                                       class="form-input form-textarea"
+                                       @bind-Value="newTask.Description" />
+                        <ValidationMessage For="() => newTask.Description" />
+                    </div>
+
+                    <div class="form-field board-due-date-field">
+                        <label for="hasDueDate" class="form-label">
+                            <input type="checkbox" id="hasDueDate" @bind="hasDueDate" />
+                            Set a due date
+                        </label>
+
+                        @if (hasDueDate)
+                        {
+                            <InputDate id="taskDueDate"
+                                       class="form-input"
+                                       @bind-Value="dueDate" />
+                        }
+                    </div>
+
+                    <SubmitButton Text="Create Task" IsBusy="@saving" />
+                </div>
+            </EditForm>
+
+            <div class="board-columns">
+                @foreach (var column in Columns)
+                {
+                    var columnTasks = tasks.Where(t => t.Status == column.Status).ToList();
+
+                    <section class="board-column">
+                        <header class="board-column-header">
+                            <h2>@column.Label</h2>
+                            <span class="board-count">@columnTasks.Count</span>
+                        </header>
+
+                        @if (columnTasks.Count == 0)
+                        {
+                            <p class="board-column-empty">No tasks here.</p>
+                        }
+
+                        @foreach (var task in columnTasks)
+                        {
+                            var assignee = GetUserName(task.OwnerId);
+
+                            <article class="board-task-card">
+                                <h3>@task.Title</h3>
+
+                                @if (!string.IsNullOrEmpty(task.Description))
+                                {
+                                    <p>@task.Description</p>
+                                }
+
+                                <div class="board-task-meta">
+                                    <span class="avatar avatar-sm" title="@assignee">
+                                        @UserInfo.GetInitials(assignee)
+                                    </span>
+                                    <span class="board-task-assignee">@assignee</span>
+
+                                    @if (task.DueDate is not null)
+                                    {
+                                        <span class="board-task-due">
+                                            Due @task.DueDate.Value.ToString("M/d/yyyy")
+                                        </span>
+                                    }
+                                </div>
+
+                                <div class="board-task-actions">
+                                    @foreach (var target in column.Moves)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-outline-secondary board-task-move-btn"
+                                                disabled="@saving"
+                                                @onclick="() => UpdateTaskStatus(task.Id, target)">
+                                            Move to @GetStatusLabel(target)
+                                        </button>
+                                    }
+                                </div>
+                            </article>
+                        }
+                    </section>
+                }
+            </div>
+        </section>
+    }
+
+    <ToastHost />
+</div>
+
+@code {
+    [Parameter]
+    public string projectId { get; set; } = string.Empty;
+
+    private Project? project;
+    private List<ProjectTask> tasks = new();
+    private List<TeamPerson> team = new();
+    private Dictionary<string, AppUser> usersById = new();
+    private bool notFound;
+    private bool noAccess;
+    private bool saving;
+    private ProjectTask newTask = new();
+    private bool hasDueDate;
+    private DateTime dueDate = DateTime.Today;
+    private string userId = string.Empty;
+
+    private static readonly TaskColumn[] Columns =
+    [
+        new("To Do", ProjectTaskStatus.ToDo,
+            [ProjectTaskStatus.InProgress, ProjectTaskStatus.Done]),
+        new("In Progress", ProjectTaskStatus.InProgress,
+            [ProjectTaskStatus.ToDo, ProjectTaskStatus.Done]),
+        new("Done", ProjectTaskStatus.Done,
+            [ProjectTaskStatus.ToDo, ProjectTaskStatus.InProgress]),
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? string.Empty;
+
+        project = await ProjectService.GetProjectByIdAsync(projectId);
+
+        if (project is null)
+        {
+            notFound = true;
+            return;
+        }
+
+        var members = await ProjectMemberService.GetMembersByProjectAsync(projectId);
+
+        team = new List<TeamPerson> { new(project.OwnerId, "Owner") };
+
+        foreach (var member in members)
+        {
+            if (member.UserId != project.OwnerId)
+            {
+                team.Add(new(member.UserId, GetRoleLabel(member.Role)));
+            }
+        }
+
+        noAccess = project.OwnerId != userId
+            && !members.Any(m => m.UserId == userId);
+
+        if (noAccess)
+        {
+            return;
+        }
+
+        await LoadTasks();
+
+        var ids = team.Select(p => p.UserId)
+            .Concat(tasks.Select(t => t.OwnerId))
+            .ToList();
+
+        usersById = await UserService.GetUsersByIdsAsync(ids);
+    }
+
+    private async Task LoadTasks()
+    {
+        if (project is not null)
+        {
+            tasks = await TaskService.GetTasksByProjectAsync(project.Id);
+        }
+    }
+
+    private int ProgressPercent =>
+        tasks.Count == 0
+            ? 0
+            : (int)Math.Round(100.0 * tasks.Count(t => t.Status == ProjectTaskStatus.Done) / tasks.Count);
+
+    private int ActiveCount =>
+        tasks.Count(t => t.Status != ProjectTaskStatus.Done);
+
+    private string GetUserName(string id) =>
+        usersById.TryGetValue(id, out var user)
+            ? user.DisplayName
+            : "Unknown";
+
+    private async Task CreateTask()
+    {
+        if (project is null || saving)
+        {
+            return;
+        }
+
+        saving = true;
+
+        try
+        {
+            newTask.ProjectId = project.Id;
+            newTask.OwnerId = userId;
+            newTask.Status = ProjectTaskStatus.ToDo;
+            newTask.DueDate = hasDueDate ? dueDate : null;
+
+            var created = await Runner.RunAsync(
+                () => TaskService.CreateTaskAsync(newTask),
+                "Task created successfully!");
+
+            if (created)
+            {
+                newTask = new ProjectTask();
+                hasDueDate = false;
+                dueDate = DateTime.Today;
+                await LoadTasks();
+            }
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private async Task UpdateTaskStatus(
+        string taskId,
+        ProjectTaskStatus status)
+    {
+        if (saving)
+        {
+            return;
+        }
+
+        saving = true;
+
+        try
+        {
+            var updated = await Runner.RunAsync(
+                () => TaskService.UpdateTaskStatusAsync(taskId, status),
+                "Task moved to " + GetStatusLabel(status));
+
+            if (updated)
+            {
+                await LoadTasks();
+            }
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private static string GetProjectStatus(Project p)
+    {
+        var now = DateTime.Now;
+
+        if (p.EndDate < now)
+        {
+            return "completed";
+        }
+
+        if (p.StartDate > now)
+        {
+            return "planning";
+        }
+
+        return "active";
+    }
+
+    private static string GetStatusLabel(ProjectTaskStatus status) => status switch
+    {
+        ProjectTaskStatus.ToDo => "To Do",
+        ProjectTaskStatus.InProgress => "In Progress",
+        _ => "Done",
+    };
+
+    private static string GetRoleLabel(ProjectRole role) => role switch
+    {
+        ProjectRole.Owner => "Owner",
+        _ => "Member",
+    };
+
+    private readonly record struct TaskColumn(
+        string Label,
+        ProjectTaskStatus Status,
+        IReadOnlyList<ProjectTaskStatus> Moves);
+
+    private sealed record TeamPerson(string UserId, string Role);
+}
