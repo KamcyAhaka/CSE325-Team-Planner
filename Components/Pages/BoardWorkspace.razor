@@ -183,6 +183,9 @@
         }
         else
         {
+            newTask.ProjectId = board.ProjectId;
+            newTask.BoardId = board.Id;
+            newTask.OwnerId = userId;
             await LoadTasks();
         }
     }
@@ -218,7 +221,12 @@
 
             if (created)
             {
-                newTask = new ProjectTask();
+                newTask = new ProjectTask
+                {
+                    ProjectId = board.ProjectId,
+                    BoardId = board.Id,
+                    OwnerId = userId
+                };
                 hasDueDate = false;
                 dueDate = DateTime.Today;
                 await LoadTasks();
