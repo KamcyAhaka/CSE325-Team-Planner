@@ -3,6 +3,7 @@
    form-input, form-textarea, btn-submit, validation-message) live in app.css. */
 
 .board-page {
+    width: 100%;
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem 1rem;
@@ -11,6 +12,7 @@
 /* ===== Board workspace (task board) ===== */
 
 .board-workspace {
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem 1rem;
