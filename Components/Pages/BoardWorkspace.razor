@@ -1,140 +1,141 @@
 @page "/boards/{boardId}"
 
+@layout DashboardLayout
+
 @rendermode InteractiveServer
 
 @attribute [Authorize]
 
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
-@using TeamProjectPlanner.Models
-@using TeamProjectPlanner.Services
 
 @inject BoardService BoardService
 @inject TaskService TaskService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UiActionRunner Runner
 
 <PageTitle>Board Workspace</PageTitle>
 
-<h1>Board Workspace</h1>
+<DashboardHeader Title="Board Workspace" Subtitle="Manage the tasks for this board." />
 
-@if (boardNotFound)
-{
-    <p>Board not found.</p>
-}
-else if (board is null)
-{
-    <p>Loading board...</p>
-}
-else
-{
-    <h2>@board.Name</h2>
-    <p>@board.Description</p>
-
-    <h3>Create Task</h3>
-
-    <EditForm Model="@newTask" OnValidSubmit="@CreateTask">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-
-        <div>
-            <label for="taskTitle">Task Title</label>
-            <InputText id="taskTitle"
-                       @bind-Value="newTask.Title" />
-        </div>
-
-        <div>
-            <label for="taskDescription">Description</label>
-            <InputTextArea id="taskDescription"
-                           @bind-Value="newTask.Description" />
-        </div>
-
-        <div>
-            <label for="taskDueDate">Due Date</label>
-            <InputDate id="taskDueDate"
-                       @bind-Value="newTask.DueDate" />
-        </div>
-
-        <button type="submit">
-            Create Task
-        </button>
-    </EditForm>
-
-    @if (!string.IsNullOrEmpty(successMessage))
+<div class="board-workspace">
+    @if (boardNotFound)
     {
-        <p role="alert">@successMessage</p>
+        <div class="project-empty">Board not found.</div>
+    }
+    else if (board is null)
+    {
+        <div class="project-empty">Loading board...</div>
+    }
+    else
+    {
+        <div class="board-header">
+            <h1>@board.Name</h1>
+
+            @if (!string.IsNullOrEmpty(board.Description))
+            {
+                <p>@board.Description</p>
+            }
+        </div>
+
+        <EditForm Model="@newTask"
+                  OnValidSubmit="@CreateTask"
+                  FormName="create-task"
+                  Class="form-card board-task-form">
+
+            <DataAnnotationsValidator />
+
+            <div class="form">
+                <h2 class="form-title">Create Task</h2>
+
+                <ValidationSummary class="form-validation" />
+
+                <div class="form-field">
+                    <label for="taskTitle" class="form-label">Task Title</label>
+                    <InputText id="taskTitle"
+                               class="form-input"
+                               @bind-Value="newTask.Title" />
+                    <ValidationMessage For="() => newTask.Title" />
+                </div>
+
+                <div class="form-field">
+                    <label for="taskDescription" class="form-label">Description</label>
+                    <InputTextArea id="taskDescription"
+                                   class="form-input form-textarea"
+                                   @bind-Value="newTask.Description" />
+                    <ValidationMessage For="() => newTask.Description" />
+                </div>
+
+                <div class="form-field board-due-date-field">
+                    <label for="hasDueDate" class="form-label">
+                        <input type="checkbox" id="hasDueDate" @bind="hasDueDate" />
+                        Set a due date
+                    </label>
+
+                    @if (hasDueDate)
+                    {
+                        <InputDate id="taskDueDate"
+                                   class="form-input"
+                                   @bind-Value="dueDate" />
+                    }
+                </div>
+
+                <SubmitButton Text="Create Task" IsBusy="@saving" />
+            </div>
+        </EditForm>
+
+        <div class="board-columns">
+            @foreach (var column in Columns)
+            {
+                var columnTasks = tasks.Where(t => t.Status == column.Status).ToList();
+
+                <section class="board-column">
+                    <header class="board-column-header">
+                        <h2>@column.Label</h2>
+                        <span class="board-count">@columnTasks.Count</span>
+                    </header>
+
+                    @if (columnTasks.Count == 0)
+                    {
+                        <p class="board-column-empty">No tasks here.</p>
+                    }
+
+                    @foreach (var task in columnTasks)
+                    {
+                        <article class="board-task-card">
+                            <h3>@task.Title</h3>
+
+                            @if (!string.IsNullOrEmpty(task.Description))
+                            {
+                                <p>@task.Description</p>
+                            }
+
+                            @if (task.DueDate is not null)
+                            {
+                                <span class="board-task-due">
+                                    Due @task.DueDate.Value.ToString("M/d/yyyy")
+                                </span>
+                            }
+
+                            <div class="board-task-actions">
+                                @foreach (var target in column.Moves)
+                                {
+                                    <button type="button"
+                                            class="btn btn-outline-secondary board-task-move-btn"
+                                            disabled="@saving"
+                                            @onclick="() => UpdateTaskStatus(task.Id, target)">
+                                        Move to @GetStatusLabel(target)
+                                    </button>
+                                }
+                            </div>
+                        </article>
+                    }
+                </section>
+            }
+        </div>
     }
 
-    <h3>Tasks</h3>
-
-    <div>
-        <section>
-            <h4>To Do</h4>
-
-            @foreach (var task in tasks.Where(t => t.Status == ProjectTaskStatus.ToDo))
-            {
-                <div>
-                    <strong>@task.Title</strong>
-                    <p>@task.Description</p>
-
-                    <button type="button"
-                            @onclick="() => UpdateTaskStatus(task.Id, ProjectTaskStatus.InProgress)">
-                        Move to In Progress
-                    </button>
-
-                    <button type="button"
-                            @onclick="() => UpdateTaskStatus(task.Id, ProjectTaskStatus.Done)">
-                        Move to Done
-                    </button>
-                </div>
-            }
-        </section>
-
-        <section>
-            <h4>In Progress</h4>
-
-            @foreach (var task in tasks.Where(t => t.Status == ProjectTaskStatus.InProgress))
-            {
-                <div>
-                    <strong>@task.Title</strong>
-                    <p>@task.Description</p>
-
-                    <button type="button"
-                            @onclick="() => UpdateTaskStatus(task.Id, ProjectTaskStatus.ToDo)">
-                        Move to To Do
-                    </button>
-
-                    <button type="button"
-                            @onclick="() => UpdateTaskStatus(task.Id, ProjectTaskStatus.Done)">
-                        Move to Done
-                    </button>
-                </div>
-            }
-        </section>
-
-        <section>
-            <h4>Done</h4>
-
-            @foreach (var task in tasks.Where(t => t.Status == ProjectTaskStatus.Done))
-            {
-                <div>
-                    <strong>@task.Title</strong>
-                    <p>@task.Description</p>
-
-                    <button type="button"
-                            @onclick="() => UpdateTaskStatus(task.Id, ProjectTaskStatus.ToDo)">
-                        Move to To Do
-                    </button>
-
-                    <button type="button"
-                            @onclick="() => UpdateTaskStatus(task.Id, ProjectTaskStatus.InProgress)">
-                        Move to In Progress
-                    </button>
-                </div>
-            }
-        </section>
-    </div>
-}
+    <ToastHost />
+</div>
 
 @code {
     [Parameter]
@@ -143,16 +144,28 @@ else
     private Board? board;
     private List<ProjectTask> tasks = new();
     private bool boardNotFound;
+    private bool saving;
     private ProjectTask newTask = new();
-    private string _userId = string.Empty;
-    private string successMessage = string.Empty;
+    private bool hasDueDate;
+    private DateTime dueDate = DateTime.Today;
+    private string userId = string.Empty;
+
+    private static readonly TaskColumn[] Columns =
+    [
+        new("To Do", ProjectTaskStatus.ToDo,
+            [ProjectTaskStatus.InProgress, ProjectTaskStatus.Done]),
+        new("In Progress", ProjectTaskStatus.InProgress,
+            [ProjectTaskStatus.ToDo, ProjectTaskStatus.Done]),
+        new("Done", ProjectTaskStatus.Done,
+            [ProjectTaskStatus.ToDo, ProjectTaskStatus.InProgress]),
+    ];
 
     protected override async Task OnInitializedAsync()
     {
         var authState =
             await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-        _userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+        userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
             ?? string.Empty;
 
         board = await BoardService.GetBoardByIdAsync(boardId);
@@ -177,30 +190,75 @@ else
 
     private async Task CreateTask()
     {
-        if (board is null)
+        if (board is null || saving)
         {
             return;
         }
 
-        newTask.ProjectId = board.ProjectId;
-        newTask.OwnerId = _userId;
-        newTask.Status = ProjectTaskStatus.ToDo;
+        saving = true;
 
-        await TaskService.CreateTaskAsync(newTask);
+        try
+        {
+            newTask.ProjectId = board.ProjectId;
+            newTask.OwnerId = userId;
+            newTask.Status = ProjectTaskStatus.ToDo;
+            newTask.DueDate = hasDueDate ? dueDate : null;
 
-        successMessage = "Task created successfully!";
+            var created = await Runner.RunAsync(
+                () => TaskService.CreateTaskAsync(newTask),
+                "Task created successfully!");
 
-        newTask = new ProjectTask();
-
-        await LoadTasks();
+            if (created)
+            {
+                newTask = new ProjectTask();
+                hasDueDate = false;
+                dueDate = DateTime.Today;
+                await LoadTasks();
+            }
+        }
+        finally
+        {
+            saving = false;
+        }
     }
 
     private async Task UpdateTaskStatus(
         string taskId,
         ProjectTaskStatus status)
     {
-        await TaskService.UpdateTaskStatusAsync(taskId, status);
+        if (saving)
+        {
+            return;
+        }
 
-        await LoadTasks();
+        saving = true;
+
+        try
+        {
+            var updated = await Runner.RunAsync(
+                () => TaskService.UpdateTaskStatusAsync(taskId, status),
+                "Task moved to " + GetStatusLabel(status));
+
+            if (updated)
+            {
+                await LoadTasks();
+            }
+        }
+        finally
+        {
+            saving = false;
+        }
     }
+
+    private static string GetStatusLabel(ProjectTaskStatus status) => status switch
+    {
+        ProjectTaskStatus.ToDo => "To Do",
+        ProjectTaskStatus.InProgress => "In Progress",
+        _ => "Done",
+    };
+
+    private readonly record struct TaskColumn(
+        string Label,
+        ProjectTaskStatus Status,
+        IReadOnlyList<ProjectTaskStatus> Moves);
 }

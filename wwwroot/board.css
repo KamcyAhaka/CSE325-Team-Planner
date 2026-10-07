@@ -1,4 +1,4 @@
-﻿/* Board creation page — page-specific styles only.
+/* Board pages — page-specific styles only.
    Shared form components (form-card, form-title, form-field, form-label,
    form-input, form-textarea, btn-submit, validation-message) live in app.css. */
 
@@ -8,8 +8,141 @@
     padding: 2rem 1rem;
 }
 
+/* ===== Board workspace (task board) ===== */
+
+.board-workspace {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.board-header {
+    margin-bottom: 1.5rem;
+}
+
+.board-header h1 {
+    margin: 0 0 0.25rem;
+    font-size: 1.5rem;
+    color: var(--color-foreground);
+}
+
+.board-header p {
+    margin: 0;
+    color: var(--color-text-secondary);
+}
+
+.board-task-form {
+    margin-bottom: 2rem;
+}
+
+.board-due-date-field label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.board-due-date-field input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--color-primary);
+}
+
+.board-columns {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: start;
+}
+
+.board-column {
+    padding: 1rem;
+    background: var(--color-hover);
+    border-radius: 0.75rem;
+}
+
+.board-column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.board-column-header h2 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--color-label);
+}
+
+.board-count {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-muted);
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+}
+
+.board-column-empty {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-muted);
+}
+
+.board-task-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.board-task-card:last-child {
+    margin-bottom: 0;
+}
+
+.board-task-card h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--color-foreground);
+}
+
+.board-task-card p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+.board-task-due {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+}
+
+.board-task-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.board-task-move-btn {
+    padding: 0.25rem 0.625rem;
+    font-size: 0.8125rem;
+}
+
+@media (max-width: 900px) {
+    .board-columns {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 640px) {
-    .board-page {
+    .board-page,
+    .board-workspace {
         padding: 1.5rem 1rem;
     }
 }
