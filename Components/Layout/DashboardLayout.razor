@@ -1,5 +1,4 @@
-﻿@inherits LayoutComponentBase
-@using System.Security.Claims
+@inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
@@ -67,22 +66,10 @@
 
         if (user.Identity?.IsAuthenticated == true)
         {
-            DisplayName = user.FindFirstValue(ClaimTypes.Name) ?? "User";
-            Email = user.FindFirstValue(ClaimTypes.Email) ?? "";
-            Initials = GetInitials(DisplayName);
+            DisplayName = UserInfo.GetDisplayName(authState);
+            Email = UserInfo.GetEmail(authState);
+            Initials = UserInfo.GetInitials(DisplayName);
         }
-    }
-
-    private static string GetInitials(string name)
-    {
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-        if (parts.Length == 0) return "U";
-        var first = parts[0][0].ToString();
-        if (parts.Length < 2) return first.ToUpperInvariant();
-
-        var last = parts[^1][0].ToString();
-        return (first + last).ToUpperInvariant();
     }
 }
 

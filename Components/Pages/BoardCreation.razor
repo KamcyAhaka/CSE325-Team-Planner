@@ -5,10 +5,6 @@
 
 @attribute [Authorize]
 
-@using Microsoft.AspNetCore.Authorization
-@using TeamProjectPlanner.Models
-@using TeamProjectPlanner.Services
-
 @inject BoardService BoardService
 @inject ProjectService ProjectService
 @inject UiActionRunner Runner
@@ -32,7 +28,7 @@ Create a board for one of your projects." />
 
             <div class="form">
 
-                <ValidationSummary class="board-validation" />
+                <ValidationSummary class="form-validation" />
 
                 <div class="form-field">
                     <label for="project" class="form-label">

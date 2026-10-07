@@ -17,6 +17,8 @@
 
     <DataAnnotationsValidator />
 
+    <ValidationSummary class="form-validation" />
+
     <div class="form-field">
         <InputText id="name" class="form-input" @bind-Value="user.DisplayName" placeholder="Full Name" autocomplete="name" />
         <ValidationMessage For="() => user.DisplayName" />

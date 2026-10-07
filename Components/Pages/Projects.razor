@@ -6,10 +6,7 @@
 @attribute [Authorize]
 
 @using System.Security.Claims
-@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
-@using TeamProjectPlanner.Models
-@using TeamProjectPlanner.Services
 
 @inject ProjectService ProjectService
 @inject UiActionRunner Runner
@@ -31,6 +28,8 @@ Create and manage your projects." />
             <DataAnnotationsValidator />
 
             <div class="form">
+
+                <ValidationSummary class="form-validation" />
 
                 <div class="form-field">
                     <label for="projectName" class="form-label">
@@ -102,12 +101,12 @@ Create and manage your projects." />
 
                         <p class="project-list-card-date">
                             <strong>Start:</strong>
-                            @item.StartDate.ToString("MMM dd, yyyy")
+                            @item.StartDate.ToString("M/d/yyyy")
                         </p>
 
                         <p class="project-list-card-date">
                             <strong>End:</strong>
-                            @item.EndDate.ToString("MMM dd, yyyy")
+                            @item.EndDate.ToString("M/d/yyyy")
                         </p>
 
                     </div>

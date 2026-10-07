@@ -8,16 +8,6 @@
     padding: 2rem 1rem;
 }
 
-.board-validation {
-    margin-bottom: 1.25rem;
-    padding: 0.875rem 1rem;
-    background: var(--color-error-bg);
-    border: 1px solid var(--color-error-border);
-    border-radius: 0.5rem;
-    color: var(--color-error);
-    font-size: 0.9375rem;
-}
-
 @media (max-width: 640px) {
     .board-page {
         padding: 1.5rem 1rem;
