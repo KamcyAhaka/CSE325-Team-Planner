@@ -4,6 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace TeamProjectPlanner.Models;
 
+/// <summary>Application user entity stored in the Users collection.</summary>
 public class AppUser : IValidatableObject
 {
     [BsonId]

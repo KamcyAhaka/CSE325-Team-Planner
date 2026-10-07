@@ -4,6 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace TeamProjectPlanner.Models;
 
+/// <summary>Workflow status of a project task.</summary>
 public enum ProjectTaskStatus
 {
     ToDo,
@@ -11,6 +12,7 @@ public enum ProjectTaskStatus
     Done
 }
 
+/// <summary>Task entity belonging to a project.</summary>
 public class ProjectTask
 {
     [BsonId]

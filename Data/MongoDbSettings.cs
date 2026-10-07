@@ -1,5 +1,6 @@
 namespace TeamProjectPlanner.Data;
 
+/// <summary>Connection settings for the MongoDB database.</summary>
 public sealed class MongoDbSettings
 {
     public const string SectionName = "MongoDB";

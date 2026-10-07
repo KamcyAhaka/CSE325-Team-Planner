@@ -2,10 +2,7 @@ using MongoDB.Driver;
 
 namespace TeamProjectPlanner.Services;
 
-/// <summary>
-/// Turns exceptions into messages that are safe and helpful to show users.
-/// Technical details belong in the logs, never in the UI.
-/// </summary>
+/// <summary>Turns exceptions into messages that are safe and helpful to show users; technical details belong in the logs.</summary>
 public static class ErrorMessages
 {
     public const string Generic = "Something went wrong. Please try again.";

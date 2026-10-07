@@ -4,12 +4,14 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace TeamProjectPlanner.Models;
 
+/// <summary>Role of a member within a project.</summary>
 public enum ProjectRole
 {
     Owner,
     Member
 }
 
+/// <summary>Membership link between a user and a project.</summary>
 public class ProjectMember
 {
     [BsonId]

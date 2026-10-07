@@ -4,6 +4,7 @@ using TeamProjectPlanner.Models;
 
 namespace TeamProjectPlanner.Services;
 
+/// <summary>CRUD operations for users with password hashing and email indexing.</summary>
 public class UserService
 {
     private readonly IMongoCollection<AppUser> _users;

@@ -4,6 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace TeamProjectPlanner.Models;
 
+/// <summary>Project entity owned by a user.</summary>
 public class Project : IValidatableObject
 {
     [BsonId]

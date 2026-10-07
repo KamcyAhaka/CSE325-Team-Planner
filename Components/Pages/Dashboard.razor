@@ -1,9 +1,8 @@
 @page "/dashboard"
 @using System.Globalization
 @using System.Security.Claims
-@using Microsoft.AspNetCore.Components.Authorization
 @attribute [Authorize]
-@layout Layout.DashboardLayout
+@layout DashboardLayout
 @inject ProjectService ProjectService
 @inject TaskService TaskService
 @inject ProjectMemberService ProjectMemberService
@@ -150,9 +149,9 @@
 </div>
 
 @code {
-    private string _userId = "";
-    private string DisplayName = "";
-    private string TodayDate = "";
+    private string _userId = string.Empty;
+    private string DisplayName = string.Empty;
+    private string TodayDate = string.Empty;
     private string Greeting = "Good day";
 
     private List<ProjectSummary> ProjectSummaries = new();

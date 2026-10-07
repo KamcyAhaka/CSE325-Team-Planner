@@ -1,5 +1,4 @@
-@using Microsoft.AspNetCore.Components.Authorization
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@inherits UserAwareComponent
 
 <header class="dashboard-header">
     <div>
@@ -20,23 +19,6 @@
 </header>
 
 @code {
-    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Title { get; set; } = string.Empty;
     [Parameter] public string? Subtitle { get; set; }
-
-    private string DisplayName = "User";
-    private string Email = "";
-    private string Initials = "U";
-
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity?.IsAuthenticated == true)
-        {
-            DisplayName = UserInfo.GetDisplayName(authState);
-            Email = UserInfo.GetEmail(authState);
-            Initials = UserInfo.GetInitials(DisplayName);
-        }
-    }
 }

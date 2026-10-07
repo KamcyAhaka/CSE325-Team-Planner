@@ -3,6 +3,7 @@ using TeamProjectPlanner.Models;
 
 namespace TeamProjectPlanner.Services;
 
+/// <summary>CRUD operations for project tasks.</summary>
 public class TaskService
 {
     private readonly IMongoCollection<ProjectTask> _tasks;

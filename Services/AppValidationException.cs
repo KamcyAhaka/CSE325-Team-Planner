@@ -1,8 +1,6 @@
 namespace TeamProjectPlanner.Services;
 
-/// <summary>
-/// Thrown when user input breaks a business rule. The message is safe to show to users.
-/// </summary>
+/// <summary>Thrown when user input breaks a business rule. The message is safe to show to users.</summary>
 public class AppValidationException : Exception
 {
     public AppValidationException(string message)

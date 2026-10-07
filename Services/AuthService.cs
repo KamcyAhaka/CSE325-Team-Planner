@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace TeamProjectPlanner.Services;
 
+/// <summary>Cookie-based authentication with login and logout.</summary>
 public class AuthService
 {
     private readonly UserService _userService;

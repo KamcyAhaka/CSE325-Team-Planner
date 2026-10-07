@@ -1,6 +1,4 @@
-@inherits LayoutComponentBase
-@using Microsoft.AspNetCore.Components.Authorization
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@inherits UserAwareLayout
 
 <div class="dashboard-shell">
     <aside class="dashboard-sidebar">
@@ -54,24 +52,6 @@
     </main>
 </div>
 
-@code {
-    private string DisplayName = "User";
-    private string Email = "";
-    private string Initials = "U";
-
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity?.IsAuthenticated == true)
-        {
-            DisplayName = UserInfo.GetDisplayName(authState);
-            Email = UserInfo.GetEmail(authState);
-            Initials = UserInfo.GetInitials(DisplayName);
-        }
-    }
-}
 
 
 

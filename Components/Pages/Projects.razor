@@ -1,12 +1,11 @@
 @page "/projects"
-@layout Layout.DashboardLayout
+@layout DashboardLayout
 
 @rendermode InteractiveServer
 
 @attribute [Authorize]
 
 @using System.Security.Claims
-@using Microsoft.AspNetCore.Components.Authorization
 
 @inject ProjectService ProjectService
 @inject UiActionRunner Runner

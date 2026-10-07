@@ -3,6 +3,7 @@ using TeamProjectPlanner.Models;
 
 namespace TeamProjectPlanner.Services;
 
+/// <summary>Operations for creating and listing boards.</summary>
 public class BoardService
 {
     private readonly IMongoCollection<Board> _boards;

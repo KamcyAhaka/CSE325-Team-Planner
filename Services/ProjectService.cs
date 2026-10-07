@@ -3,6 +3,7 @@ using TeamProjectPlanner.Models;
 
 namespace TeamProjectPlanner.Services;
 
+/// <summary>Operations for creating and listing projects.</summary>
 public class ProjectService
 {
     private readonly IMongoCollection<Project> _projects;

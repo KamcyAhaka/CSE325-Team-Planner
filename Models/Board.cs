@@ -4,6 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace TeamProjectPlanner.Models;
 
+/// <summary>Kanban board belonging to a project.</summary>
 public class Board
 {
     [BsonId]
