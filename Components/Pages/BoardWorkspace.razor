@@ -18,7 +18,11 @@
 
 <h1>Board Workspace</h1>
 
-@if (board is null)
+@if (boardNotFound)
+{
+    <p>Board not found.</p>
+}
+else if (board is null)
 {
     <p>Loading board...</p>
 }
@@ -138,6 +142,7 @@ else
 
     private Board? board;
     private List<ProjectTask> tasks = new();
+    private bool boardNotFound;
     private ProjectTask newTask = new();
     private string _userId = string.Empty;
     private string successMessage = string.Empty;
@@ -152,7 +157,11 @@ else
 
         board = await BoardService.GetBoardByIdAsync(boardId);
 
-        if (board is not null)
+        if (board is null)
+        {
+            boardNotFound = true;
+        }
+        else
         {
             await LoadTasks();
         }
