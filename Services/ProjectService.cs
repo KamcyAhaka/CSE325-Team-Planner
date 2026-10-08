@@ -24,6 +24,16 @@ public class ProjectService
         EntityValidator.EnsureValid(project);
 
         await _projects.InsertOneAsync(project);
+
+        var ownerMember = new ProjectMember
+        {
+            ProjectId = project.Id,
+            UserId = project.OwnerId,
+            Role = ProjectRole.Owner,
+            JoinedAt = DateTime.UtcNow
+        };
+
+        await _members.InsertOneAsync(ownerMember);
     }
 
     public async Task<List<Project>> GetProjectsForUserAsync(string userId)
