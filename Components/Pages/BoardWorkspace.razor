@@ -12,6 +12,7 @@
 @inject TaskService TaskService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UiActionRunner Runner
+@inject NavigationManager NavigationManager
 
 <PageTitle>Board Workspace</PageTitle>
 
@@ -35,14 +36,98 @@
             </a>
         </div>
 
-        <div class="board-header">
-            <h1>@board.Name</h1>
+        @if (editingBoard)
+        {
+            <div class="board-header">
+                <h1>Edit Board</h1>
 
-            @if (!string.IsNullOrEmpty(board.Description))
-            {
-                <p>@board.Description</p>
-            }
-        </div>
+                <EditForm Model="@editBoard"
+                          OnValidSubmit="@UpdateBoard"
+                          FormName="edit-board"
+                          Class="form-card">
+
+                    <DataAnnotationsValidator />
+
+                    <ValidationSummary class="form-validation" />
+
+                    <div class="form-field">
+                        <label for="editBoardName" class="form-label">Board Name</label>
+                        <LiveInputText id="editBoardName"
+                                       class="form-input"
+                                       @bind-Value="editBoard.Name" />
+                        <ValidationMessage For="() => editBoard.Name" />
+                    </div>
+
+                    <div class="form-field">
+                        <label for="editBoardDescription" class="form-label">Description</label>
+                        <LiveInputTextArea id="editBoardDescription"
+                                           class="form-input form-textarea"
+                                           @bind-Value="editBoard.Description" />
+                        <ValidationMessage For="() => editBoard.Description" />
+                    </div>
+
+                    <div class="card-actions">
+                        <SubmitButton Text="Save Changes"
+                                      Class="btn btn-primary card-action-btn"
+                                      IsBusy="@savingBoard" />
+                        <button type="button"
+                                class="btn btn-outline-secondary card-action-btn"
+                                disabled="@savingBoard"
+                                @onclick="CancelEditBoard">
+                            Cancel
+                        </button>
+                    </div>
+
+                </EditForm>
+            </div>
+        }
+        else if (confirmingDeleteBoard)
+        {
+            <div class="board-header">
+                <h1>@board.Name</h1>
+
+                <p>Delete this board? Its tasks will be deleted too.</p>
+
+                <div class="card-confirm">
+                    <button type="button"
+                            class="btn btn-danger card-action-btn"
+                            disabled="@deletingBoard"
+                            @onclick="DeleteBoard">
+                        @(deletingBoard ? "Deleting..." : "Yes, delete")
+                    </button>
+                    <button type="button"
+                            class="btn btn-outline-secondary card-action-btn"
+                            disabled="@deletingBoard"
+                            @onclick="CancelDeleteBoard">
+                        No
+                    </button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="board-header">
+                <h1>@board.Name</h1>
+
+                @if (!string.IsNullOrEmpty(board.Description))
+                {
+                    <p>@board.Description</p>
+                }
+
+                <div class="card-actions">
+                    <button type="button"
+                            class="btn btn-outline-secondary card-action-btn"
+                            @onclick="StartEditBoard">
+                        Edit
+                    </button>
+                    <button type="button"
+                            class="btn btn-danger card-action-btn"
+                            @onclick="StartDeleteBoard">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        }
 
         <EditForm Model="@newTask"
                   OnValidSubmit="@CreateTask"
@@ -273,6 +358,13 @@
     private string? deletingTaskId;
     private bool deletingTask;
 
+    private bool editingBoard;
+    private Board editBoard = new();
+    private bool savingBoard;
+
+    private bool confirmingDeleteBoard;
+    private bool deletingBoard;
+
     private static readonly TaskColumn[] Columns =
     [
         new("To Do", ProjectTaskStatus.ToDo,
@@ -468,6 +560,91 @@
         finally
         {
             deletingTask = false;
+        }
+    }
+
+    private void StartEditBoard()
+    {
+        if (board is null || savingBoard)
+        {
+            return;
+        }
+
+        editingBoard = true;
+        editBoard = new Board
+        {
+            Id = board.Id,
+            ProjectId = board.ProjectId,
+            Name = board.Name,
+            Description = board.Description ?? string.Empty
+        };
+    }
+
+    private void CancelEditBoard()
+    {
+        editingBoard = false;
+    }
+
+    private async Task UpdateBoard()
+    {
+        if (board is null || savingBoard)
+        {
+            return;
+        }
+
+        savingBoard = true;
+
+        try
+        {
+            var updated = await Runner.RunAsync(
+                () => BoardService.UpdateBoardAsync(editBoard),
+                "Board updated successfully!");
+
+            if (updated)
+            {
+                editingBoard = false;
+                board = await BoardService.GetBoardByIdAsync(board.Id);
+            }
+        }
+        finally
+        {
+            savingBoard = false;
+        }
+    }
+
+    private void StartDeleteBoard()
+    {
+        confirmingDeleteBoard = true;
+    }
+
+    private void CancelDeleteBoard()
+    {
+        confirmingDeleteBoard = false;
+    }
+
+    private async Task DeleteBoard()
+    {
+        if (board is null || deletingBoard)
+        {
+            return;
+        }
+
+        deletingBoard = true;
+
+        try
+        {
+            var deleted = await Runner.RunAsync(
+                () => BoardService.DeleteBoardAsync(board.Id),
+                "Board deleted successfully!");
+
+            if (deleted)
+            {
+                NavigationManager.NavigateTo($"/projects/{board.ProjectId}");
+            }
+        }
+        finally
+        {
+            deletingBoard = false;
         }
     }
 
