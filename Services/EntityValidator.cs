@@ -2,9 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TeamProjectPlanner.Services;
 
-/// <summary>
-/// Runs the DataAnnotations rules declared on a model, so forms and services share one set of rules.
-/// </summary>
+/// <summary>Runs the DataAnnotations rules declared on a model, so forms and services share one set of rules.</summary>
 public static class EntityValidator
 {
     public static void EnsureValid(object entity)

@@ -1,10 +1,6 @@
 namespace TeamProjectPlanner.Services;
 
-/// <summary>
-/// Runs a UI action with consistent error handling: logs failures, shows a friendly
-/// error toast, and optionally a success toast. Use it from interactive pages instead
-/// of writing try/catch in every handler.
-/// </summary>
+/// <summary>Runs a UI action with consistent error handling: logs failures, shows a friendly error toast, and optionally a success toast.</summary>
 public class UiActionRunner
 {
     private readonly ToastService _toasts;

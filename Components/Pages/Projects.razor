@@ -1,94 +1,76 @@
 @page "/projects"
 @layout DashboardLayout
+
 @rendermode InteractiveServer
 
 @attribute [Authorize]
 
 @using System.Security.Claims
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Authorization
-@using TeamProjectPlanner.Models
-@using TeamProjectPlanner.Services
 
 @inject ProjectService ProjectService
+@inject UiActionRunner Runner
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Projects</PageTitle>
 
+<DashboardHeader Title="Projects" Subtitle="
+Create and manage your projects." />
+
 <div class="project-page">
 
-    <div class="project-page-header">
-        <h1 class="project-page-title">Projects</h1>
+    <div class="form-card">
 
-        <p class="project-page-subtitle">
-            Create and manage your projects.
-        </p>
-    </div>
+        <h2 class="form-title">Create Project</h2>
 
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <div class="project-success" role="alert">
-            @successMessage
-        </div>
-    }
+        <EditForm Model="@project" OnValidSubmit="@CreateProject" FormName="create-project">
 
-    <div class="project-form-card">
+            <DataAnnotationsValidator />
 
-        <h2 class="project-form-title">Create Project</h2>
+            <div class="form">
 
-        <EditForm Model="@project"
-                  OnValidSubmit="@CreateProject"
-                  FormName="create-project">
+                <ValidationSummary class="form-validation" />
 
-            <div class="project-form">
-
-                <div class="project-form-field">
-                    <label for="projectName" class="project-form-label">
+                <div class="form-field">
+                    <label for="projectName" class="form-label">
                         Project Name
                     </label>
 
-                    <InputText id="projectName"
-                               class="project-form-input"
-                               @bind-Value="project.Name" />
+                    <InputText id="projectName" class="form-input" @bind-Value="project.Name" />
+                    <ValidationMessage For="() => project.Name" />
                 </div>
 
-                <div class="project-form-field">
-                    <label for="projectDescription" class="project-form-label">
+                <div class="form-field">
+                    <label for="projectDescription" class="form-label">
                         Description
                     </label>
 
-                    <InputTextArea id="projectDescription"
-                                   class="project-form-input project-form-textarea"
+                    <InputTextArea id="projectDescription" class="form-input form-textarea"
                                    @bind-Value="project.Description" />
+                    <ValidationMessage For="() => project.Description" />
                 </div>
 
                 <div class="project-date-row">
 
-                    <div class="project-form-field">
-                        <label for="startDate" class="project-form-label">
+                    <div class="form-field">
+                        <label for="startDate" class="form-label">
                             Start Date
                         </label>
 
-                        <InputDate id="startDate"
-                                   class="project-form-input"
-                                   @bind-Value="project.StartDate" />
+                        <InputDate id="startDate" class="form-input" @bind-Value="project.StartDate" />
                     </div>
 
-                    <div class="project-form-field">
-                        <label for="endDate" class="project-form-label">
+                    <div class="form-field">
+                        <label for="endDate" class="form-label">
                             End Date
                         </label>
 
-                        <InputDate id="endDate"
-                                   class="project-form-input"
-                                   @bind-Value="project.EndDate" />
+                        <InputDate id="endDate" class="form-input" @bind-Value="project.EndDate" />
+                        <ValidationMessage For="() => project.EndDate" />
                     </div>
 
                 </div>
 
-                <button type="submit" class="project-submit">
-                    Create Project
-                </button>
+                <SubmitButton Text="Create Project" IsBusy="@saving" />
 
             </div>
 
@@ -106,24 +88,24 @@
 
                 @foreach (var item in projects)
                 {
-                    <div class="project-card">
+                    <div class="project-list-card">
 
-                        <h3 class="project-card-title">
+                        <h3 class="project-list-card-title">
                             @item.Name
                         </h3>
 
-                        <p class="project-card-description">
+                        <p class="project-list-card-description">
                             @item.Description
                         </p>
 
-                        <p class="project-card-date">
+                        <p class="project-list-card-date">
                             <strong>Start:</strong>
-                            @item.StartDate.ToString("MMM dd, yyyy")
+                            @item.StartDate.ToString("M/d/yyyy")
                         </p>
 
-                        <p class="project-card-date">
+                        <p class="project-list-card-date">
                             <strong>End:</strong>
-                            @item.EndDate.ToString("MMM dd, yyyy")
+                            @item.EndDate.ToString("M/d/yyyy")
                         </p>
 
                     </div>
@@ -142,10 +124,12 @@
 
 </div>
 
+<ToastHost />
+
 @code {
     private Project project = new();
     private List<Project> projects = new();
-    private string successMessage = string.Empty;
+    private bool saving;
 
     protected override async Task OnInitializedAsync()
     {
@@ -161,11 +145,22 @@
 
         project.OwnerId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
 
-        await ProjectService.CreateProjectAsync(project);
+        saving = true;
+        try
+        {
+            var created = await Runner.RunAsync(
+                () => ProjectService.CreateProjectAsync(project),
+                "Project created successfully!");
 
-        successMessage = "Project created successfully!";
-
-        project = new Project();
-        projects = await ProjectService.GetProjectsAsync();
+            if (created)
+            {
+                project = new Project();
+                projects = await ProjectService.GetProjectsAsync();
+            }
+        }
+        finally
+        {
+            saving = false;
+        }
     }
 }

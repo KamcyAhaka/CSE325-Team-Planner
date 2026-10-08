@@ -1,59 +1,43 @@
 @page "/boards/create"
+@layout DashboardLayout
 
 @rendermode InteractiveServer
 
 @attribute [Authorize]
 
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components
-@using TeamProjectPlanner.Models
-@using TeamProjectPlanner.Services
-
 @inject BoardService BoardService
 @inject ProjectService ProjectService
 @inject NavigationManager NavigationManager
+@inject UiActionRunner Runner
 
 <PageTitle>Create Board</PageTitle>
 
+<DashboardHeader Title="Create Board" Subtitle="
+Create a board for one of your projects." />
+
 <div class="board-page">
 
-    <div class="board-page-header">
-        <h1 class="board-page-title">Create Board</h1>
+    <div class="form-card">
 
-        <p class="board-page-subtitle">
-            Create a board for one of your projects.
-        </p>
-    </div>
-
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <div class="board-success" role="alert">
-            @successMessage
-        </div>
-    }
-
-    <div class="board-form-card">
-
-        <h2 class="board-form-title">Board Details</h2>
+        <h2 class="form-title">Board Details</h2>
 
         <EditForm Model="@board"
                   OnValidSubmit="@CreateBoard"
-                  OnInvalidSubmit="@HandleInvalidSubmit"
                   FormName="create-board">
 
             <DataAnnotationsValidator />
 
-            <div class="board-form">
+            <div class="form">
 
-                <ValidationSummary class="board-validation" />
+                <ValidationSummary class="form-validation" />
 
-                <div class="board-form-field">
-                    <label for="project" class="board-form-label">
+                <div class="form-field">
+                    <label for="project" class="form-label">
                         Project
                     </label>
 
                     <select id="project"
-                            class="board-form-input"
+                            class="form-input"
                             @bind="board.ProjectId">
                         <option value="">Select a project</option>
 
@@ -64,31 +48,32 @@
                             </option>
                         }
                     </select>
+                    <ValidationMessage For="() => board.ProjectId" />
                 </div>
 
-                <div class="board-form-field">
-                    <label for="boardName" class="board-form-label">
+                <div class="form-field">
+                    <label for="boardName" class="form-label">
                         Board Name
                     </label>
 
                     <InputText id="boardName"
-                               class="board-form-input"
+                               class="form-input"
                                @bind-Value="board.Name" />
+                    <ValidationMessage For="() => board.Name" />
                 </div>
 
-                <div class="board-form-field">
-                    <label for="boardDescription" class="board-form-label">
+                <div class="form-field">
+                    <label for="boardDescription" class="form-label">
                         Description
                     </label>
 
                     <InputTextArea id="boardDescription"
-                                   class="board-form-input board-form-textarea"
+                                   class="form-input form-textarea"
                                    @bind-Value="board.Description" />
+                    <ValidationMessage For="() => board.Description" />
                 </div>
 
-                <button type="submit" class="board-submit">
-                    Create Board
-                </button>
+                <SubmitButton Text="Create Board" IsBusy="@saving" />
 
             </div>
 
@@ -98,10 +83,12 @@
 
 </div>
 
+<ToastHost />
+
 @code {
     private List<Project> projects = new();
     private Board board = new();
-    private string successMessage = string.Empty;
+    private bool saving;
 
     protected override async Task OnInitializedAsync()
     {
@@ -110,13 +97,21 @@
 
     private async Task CreateBoard()
     {
-        await BoardService.CreateBoardAsync(board);
+        saving = true;
+        try
+        {
+            var created = await Runner.RunAsync(
+                () => BoardService.CreateBoardAsync(board),
+                "Board created successfully!");
 
-        NavigationManager.NavigateTo($"/boards/{board.Id}");
-    }
-
-    private void HandleInvalidSubmit()
-    {
-        successMessage = string.Empty;
+            if (created)
+            {
+                NavigationManager.NavigateTo($"/boards/{board.Id}");
+            }
+        }
+        finally
+        {
+            saving = false;
+        }
     }
 }

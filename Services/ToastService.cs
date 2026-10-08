@@ -1,5 +1,6 @@
 namespace TeamProjectPlanner.Services;
 
+/// <summary>Severity level of a toast notification.</summary>
 public enum ToastLevel
 {
     Success,
@@ -8,11 +9,10 @@ public enum ToastLevel
     Error
 }
 
+/// <summary>A single toast notification shown to the user.</summary>
 public sealed record ToastMessage(Guid Id, ToastLevel Level, string Message, TimeSpan Duration);
 
-/// <summary>
-/// Holds the toast notifications for the current user's circuit. Rendered by the ToastHost component.
-/// </summary>
+/// <summary>Holds the toast notifications for the current user's circuit. Rendered by the ToastHost component.</summary>
 public class ToastService
 {
     private const int MaxVisible = 5;

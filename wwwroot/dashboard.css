@@ -6,15 +6,15 @@
 .dashboard-shell {
     display: flex;
     min-height: 100vh;
-    background-color: var(--auth-bg);
+    background-color: var(--color-bg);
 }
 
 /* Sidebar */
 .dashboard-sidebar {
     width: 256px;
     min-width: 256px;
-    background-color: var(--auth-card);
-    border-right: 1px solid var(--auth-border);
+    background-color: var(--color-card);
+    border-right: 1px solid var(--color-border);
     display: flex;
     flex-direction: column;
 }
@@ -25,14 +25,14 @@
     align-items: center;
     gap: 12px;
     padding: 24px;
-    border-bottom: 1px solid var(--auth-border);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .sidebar-logo {
     width: 40px;
     height: 40px;
     border-radius: 10px;
-    background-color: rgba(37, 99, 235, 0.1);
+    background-color: var(--color-primary-soft);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -47,14 +47,14 @@
 .sidebar-brand-name {
     font-size: 16px;
     font-weight: 700;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
     line-height: 1.3;
 }
 
 .sidebar-brand-sub {
     font-size: 10px;
     font-weight: 500;
-    color: var(--auth-muted);
+    color: var(--color-muted);
     letter-spacing: 0.5px;
 }
 
@@ -75,20 +75,20 @@
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
-    color: var(--auth-muted);
+    color: var(--color-muted);
     text-decoration: none;
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .sidebar-link:hover {
-    background-color: var(--auth-bg);
-    color: var(--auth-foreground);
+    background-color: var(--color-bg);
+    color: var(--color-foreground);
 }
 
 .sidebar-link.active {
-    background-color: var(--auth-primary);
+    background-color: var(--color-primary);
     color: #ffffff;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 2px 8px var(--color-primary-strong);
 }
 
 /* Create Project */
@@ -103,23 +103,23 @@
     justify-content: center;
     gap: 8px;
     padding: 10px 16px;
-    border: 2px dashed var(--auth-primary);
+    border: 2px dashed var(--color-primary);
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
-    color: var(--auth-primary);
+    color: var(--color-primary);
     text-decoration: none;
     transition: background-color 0.15s ease;
 }
 
 .sidebar-create:hover {
-    background-color: rgba(37, 99, 235, 0.05);
+    background-color: var(--color-primary-faint);
 }
 
 /* Footer */
 .sidebar-footer {
     padding: 16px;
-    border-top: 1px solid var(--auth-border);
+    border-top: 1px solid var(--color-border);
     background-color: rgba(241, 245, 249, 0.2);
 }
 
@@ -134,14 +134,14 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: rgba(37, 99, 235, 0.1);
+    background-color: var(--color-primary-soft);
     border: 2px solid #bfdbfe;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
     font-weight: 600;
-    color: var(--auth-primary);
+    color: var(--color-primary);
     flex-shrink: 0;
 }
 
@@ -153,7 +153,7 @@
 .sidebar-user-name {
     font-size: 13px;
     font-weight: 600;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -161,7 +161,7 @@
 
 .sidebar-user-email {
     font-size: 11px;
-    color: var(--auth-muted);
+    color: var(--color-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -173,7 +173,7 @@
     gap: 8px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--auth-error);
+    color: var(--color-error);
     text-decoration: none;
     padding: 6px 0;
     transition: opacity 0.15s ease;
@@ -197,20 +197,20 @@
     align-items: center;
     justify-content: space-between;
     padding: 20px 32px;
-    background-color: var(--auth-card);
-    border-bottom: 1px solid var(--auth-border);
+    background-color: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .dashboard-title {
     font-size: 20px;
     font-weight: 700;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
     margin: 0;
 }
 
 .dashboard-subtitle {
     font-size: 12px;
-    color: var(--auth-muted);
+    color: var(--color-muted);
     margin: 4px 0 0;
 }
 
@@ -219,7 +219,7 @@
     align-items: center;
     gap: 10px;
     padding: 6px 12px;
-    border: 1px solid var(--auth-border);
+    border: 1px solid var(--color-border);
     border-radius: 8px;
     background-color: rgba(248, 250, 252, 0.3);
 }
@@ -233,12 +233,12 @@
 .header-user-name {
     font-size: 12px;
     font-weight: 600;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
 }
 
 .header-user-email {
     font-size: 10px;
-    color: var(--auth-muted);
+    color: var(--color-muted);
 }
 
 /* Icons (CSS mask technique) */
@@ -296,11 +296,6 @@
     mask-image: url("icons/calendar.svg");
 }
 
-.icon-layers {
-    -webkit-mask-image: url("icons/layers.svg");
-    mask-image: url("icons/layers.svg");
-}
-
 .icon-arrow-right {
     -webkit-mask-image: url("icons/arrow-right.svg");
     mask-image: url("icons/arrow-right.svg");
@@ -334,7 +329,7 @@
     position: relative;
     overflow: hidden;
     border-radius: 16px;
-    background: linear-gradient(135deg, var(--auth-primary) 0%, var(--auth-primary-hover) 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
     color: #ffffff;
     padding: 24px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -4px rgba(0, 0, 0, .05);
@@ -425,8 +420,8 @@
     align-items: center;
     gap: 16px;
     padding: 20px;
-    background-color: var(--auth-card);
-    border: 1px solid var(--auth-border);
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
 }
 
@@ -441,8 +436,8 @@
 }
 
 .stat-icon-primary {
-    background-color: rgba(37, 99, 235, 0.1);
-    color: var(--auth-primary);
+    background-color: var(--color-primary-soft);
+    color: var(--color-primary);
 }
 
 .stat-icon-blue {
@@ -452,12 +447,12 @@
 
 .stat-icon-success {
     background-color: rgba(22, 163, 74, 0.1);
-    color: var(--auth-success);
+    color: var(--color-success);
 }
 
 .stat-icon-error {
     background-color: rgba(239, 68, 68, 0.1);
-    color: var(--auth-error);
+    color: var(--color-error);
 }
 
 .stat-info {
@@ -469,13 +464,13 @@
 .stat-label {
     font-size: 13px;
     font-weight: 500;
-    color: var(--auth-muted);
+    color: var(--color-muted);
 }
 
 .stat-value {
     font-size: 24px;
     font-weight: 700;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
     line-height: 1.3;
 }
 
@@ -521,7 +516,7 @@
 .section-title {
     font-size: 18px;
     font-weight: 700;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
     margin: 0;
 }
 
@@ -531,12 +526,12 @@
     gap: 4px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--auth-primary);
+    color: var(--color-primary);
     text-decoration: none;
 }
 
 .view-all-link:hover {
-    color: var(--auth-primary-hover);
+    color: var(--color-primary-hover);
 }
 
 /* Empty states */
@@ -549,7 +544,7 @@
     gap: 12px;
     padding: 48px 24px;
     text-align: center;
-    color: var(--auth-muted);
+    color: var(--color-muted);
     font-size: 14px;
 }
 
@@ -561,7 +556,7 @@
 .empty-icon {
     width: 32px;
     height: 32px;
-    color: var(--auth-muted);
+    color: var(--color-muted);
 }
 
 /* Projects Grid */
@@ -582,14 +577,14 @@
     flex-direction: column;
     gap: 12px;
     padding: 24px;
-    background-color: var(--auth-card);
-    border: 1px solid var(--auth-border);
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .project-card:hover {
-    border-color: #cbd5e1;
+    border-color: var(--color-border-strong);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
@@ -603,8 +598,8 @@
     font-size: 12px;
     font-weight: 600;
     text-transform: capitalize;
-    color: var(--auth-primary);
-    background-color: rgba(37, 99, 235, 0.15);
+    color: var(--color-primary);
+    background-color: var(--color-primary-subtle);
     padding: 4px 12px;
     border-radius: 9999px;
 }
@@ -614,13 +609,13 @@
     align-items: center;
     gap: 6px;
     font-size: 12px;
-    color: var(--auth-muted);
+    color: var(--color-muted);
 }
 
 .project-name {
     font-size: 16px;
     font-weight: 700;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -630,7 +625,7 @@
 .project-desc {
     font-size: 13px;
     line-height: 1.5;
-    color: var(--auth-muted);
+    color: var(--color-muted);
     margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -653,25 +648,25 @@
 }
 
 .progress-label {
-    color: var(--auth-muted);
+    color: var(--color-muted);
 }
 
 .progress-value {
     font-weight: 600;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
 }
 
 .progress-bar {
     height: 6px;
     border-radius: 9999px;
-    background-color: #e2e8f0;
+    background-color: var(--color-border);
     overflow: hidden;
 }
 
 .progress-fill {
     height: 100%;
     border-radius: 9999px;
-    background-color: var(--auth-primary);
+    background-color: var(--color-primary);
     transition: width 0.3s ease;
 }
 
@@ -684,11 +679,11 @@
 
 .member-count {
     font-size: 12px;
-    color: var(--auth-muted);
+    color: var(--color-muted);
 }
 
 .member-count strong {
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
 }
 
 .view-workspace-link {
@@ -697,20 +692,20 @@
     gap: 4px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--auth-primary);
+    color: var(--color-primary);
     text-decoration: none;
 }
 
 .view-workspace-link:hover {
-    color: var(--auth-primary-hover);
+    color: var(--color-primary-hover);
 }
 
 /* My Tasks */
 .my-tasks-badge {
     font-size: 12px;
     font-weight: 600;
-    color: var(--auth-muted);
-    background-color: #f1f5f9;
+    color: var(--color-muted);
+    background-color: var(--color-hover);
     padding: 4px 10px;
     border-radius: 9999px;
 }
@@ -730,8 +725,8 @@
     justify-content: space-between;
     gap: 12px;
     padding: 14px 16px;
-    background-color: var(--auth-card);
-    border: 1px solid var(--auth-border);
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
 }
 
@@ -745,7 +740,7 @@
 .task-title {
     font-size: 14px;
     font-weight: 600;
-    color: var(--auth-foreground);
+    color: var(--color-foreground);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -756,7 +751,7 @@
     align-items: center;
     gap: 8px;
     font-size: 12px;
-    color: var(--auth-muted);
+    color: var(--color-muted);
 }
 
 .task-due {
@@ -766,7 +761,7 @@
 }
 
 .task-due-overdue {
-    color: var(--auth-error);
+    color: var(--color-error);
     font-weight: 600;
 }
 
@@ -780,16 +775,16 @@
 }
 
 .task-status-todo {
-    color: #475569;
-    background-color: #f1f5f9;
+    color: var(--color-text-secondary);
+    background-color: var(--color-hover);
 }
 
 .task-status-inprogress {
-    color: var(--auth-primary);
+    color: var(--color-primary);
     background-color: rgba(37, 99, 235, 0.12);
 }
 
 .task-status-done {
-    color: var(--auth-success);
+    color: var(--color-success);
     background-color: rgba(22, 163, 74, 0.12);
 }

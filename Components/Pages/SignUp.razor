@@ -1,11 +1,11 @@
 @page "/auth/sign-up"
 @page "/sign-up"
 @page "/register"
-@layout Layout.AuthLayout
+@layout AuthLayout
 @rendermode InteractiveServer
 @inject UserService UserService
 @inject NavigationManager NavigationManager
-@inject ILogger<SignUp> Logger
+@inject UiActionRunner Runner
 
 <PageTitle>Sign Up - Team Project Planner</PageTitle>
 
@@ -13,214 +13,70 @@
     <h1 class="auth-title">Sign up to track your projects and tasks</h1>
 </div>
 
-@if (!string.IsNullOrEmpty(generalError))
-{
-    <div class="alert-banner alert-error" role="alert">
-        <svg class="alert-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-        <span>@generalError</span>
+<EditForm Model="@user" OnValidSubmit="@HandleSubmit" FormName="sign-up" Class="auth-form" novalidate>
+
+    <DataAnnotationsValidator />
+
+    <ValidationSummary class="form-validation" />
+
+    <div class="form-field">
+        <InputText id="name" class="form-input" @bind-Value="user.DisplayName" placeholder="Full Name" autocomplete="name" />
+        <ValidationMessage For="() => user.DisplayName" />
     </div>
-}
 
-@if (isRegisteredSuccess)
-{
-    <div class="alert-banner alert-success" role="alert">
-        <svg class="alert-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-        </svg>
-        <div>
-            <strong>Account created successfully!</strong>
-            <p class="mb-0">Redirecting to sign in...</p>
-        </div>
+    <div class="form-field">
+        <InputText id="email" type="email" class="form-input" @bind-Value="user.Email" placeholder="Email" autocomplete="email" />
+        <ValidationMessage For="() => user.Email" />
     </div>
-}
-else
-{
-    <form @onsubmit="HandleSubmit" class="auth-form" novalidate>
-        <!-- Name Input -->
-        <div class="form-field">
-            <input
-                id="name"
-                type="text"
-                placeholder="Full Name"
-                @bind="name"
-                @bind:event="oninput"
-                disabled="@isLoading"
-                class="form-input @(fieldErrors.ContainsKey("name") ? "input-error" : "")"
-                autocomplete="name"
-                required />
-            @if (fieldErrors.TryGetValue("name", out var nameErr))
-            {
-                <span class="field-error">@nameErr</span>
-            }
-        </div>
 
-        <!-- Email Input -->
-        <div class="form-field">
-            <input
-                id="email"
-                type="email"
-                placeholder="Email"
-                @bind="email"
-                @bind:event="oninput"
-                disabled="@isLoading"
-                class="form-input @(fieldErrors.ContainsKey("email") ? "input-error" : "")"
-                autocomplete="email"
-                required />
-            @if (fieldErrors.TryGetValue("email", out var emailErr))
-            {
-                <span class="field-error">@emailErr</span>
-            }
-        </div>
+    <div class="form-field">
+        <InputText id="password" type="password" class="form-input" @bind-Value="user.Password" placeholder="Password" autocomplete="new-password" />
+        <ValidationMessage For="() => user.Password" />
+        <p class="password-hint">
+            Password must be at least 8 characters, contain one uppercase letter, one lowercase letter, and one number.
+        </p>
+    </div>
 
-        <!-- Password Input -->
-        <div class="form-field">
-            <input
-                id="password"
-                type="password"
-                placeholder="Password"
-                @bind="password"
-                @bind:event="oninput"
-                disabled="@isLoading"
-                class="form-input @(fieldErrors.ContainsKey("password") ? "input-error" : "")"
-                autocomplete="new-password"
-                required />
-            @if (fieldErrors.TryGetValue("password", out var pwdErr))
-            {
-                <span class="field-error">@pwdErr</span>
-            }
-            <p class="password-hint">
-                Password must be at least 8 characters, contain one uppercase letter, one lowercase letter, and one number.
-            </p>
-        </div>
-
-        <!-- Submit Button -->
-        <button
-            type="submit"
-            class="btn-submit"
-            disabled="@isLoading">
-            @if (isLoading)
-            {
-                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                <span>Creating Account...</span>
-            }
-            else
-            {
-                <span>Sign Up</span>
-            }
-        </button>
-    </form>
-}
+    <SubmitButton Text="Sign Up" IsBusy="@saving" />
+</EditForm>
 
 <div class="auth-footer">
     <span>Already have an account? </span>
     <a href="/auth/sign-in" class="auth-link">Sign in here</a>
 </div>
 
-@code {
-    private string name = string.Empty;
-    private string email = string.Empty;
-    private string password = string.Empty;
+<ToastHost />
 
-    private string? generalError;
-    private Dictionary<string, string> fieldErrors = new();
-    private bool isLoading = false;
-    private bool isRegisteredSuccess = false;
+@code {
+    private AppUser user = new();
+    private bool saving;
 
     private async Task HandleSubmit()
     {
-        generalError = null;
-        fieldErrors.Clear();
-
-        // 1. Validate Full Name
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            fieldErrors["name"] = "Full name is required.";
-        }
-        else if (name.Trim().Length > 100)
-        {
-            fieldErrors["name"] = "Name cannot exceed 100 characters.";
-        }
-
-        // 2. Validate Email
-        var trimmedEmail = email.Trim().ToLowerInvariant();
-        if (string.IsNullOrWhiteSpace(trimmedEmail))
-        {
-            fieldErrors["email"] = "Email address is required.";
-        }
-        else if (!System.Text.RegularExpressions.Regex.IsMatch(trimmedEmail, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-        {
-            fieldErrors["email"] = "Please provide a valid email address.";
-        }
-        else if (trimmedEmail.Length > 255)
-        {
-            fieldErrors["email"] = "Email is too long.";
-        }
-
-        // 3. Validate Password
-        if (string.IsNullOrWhiteSpace(password))
-        {
-            fieldErrors["password"] = "Password is required.";
-        }
-        else if (password.Length < 8)
-        {
-            fieldErrors["password"] = "Password must be at least 8 characters long.";
-        }
-        else if (!password.Any(char.IsUpper))
-        {
-            fieldErrors["password"] = "Password must contain at least one uppercase letter.";
-        }
-        else if (!password.Any(char.IsLower))
-        {
-            fieldErrors["password"] = "Password must contain at least one lowercase letter.";
-        }
-        else if (!password.Any(char.IsDigit))
-        {
-            fieldErrors["password"] = "Password must contain at least one number.";
-        }
-
-        if (fieldErrors.Count > 0)
-        {
-            return;
-        }
-
-        isLoading = true;
-
+        saving = true;
         try
         {
-            // 4. Check if email already registered
-            var existingUser = await UserService.GetByEmailAsync(trimmedEmail);
-            if (existingUser != null)
+            var email = user.Email.Trim().ToLowerInvariant();
+            var created = await Runner.RunAsync(async () =>
             {
-                generalError = "User with this email already exists.";
-                isLoading = false;
-                return;
+                var existing = await UserService.GetByEmailAsync(email);
+                if (existing is not null)
+                {
+                    throw new AppValidationException("User with this email already exists.");
+                }
+
+                await UserService.CreateUserAsync(email, user.Password, user.DisplayName.Trim());
+            }, "Account created successfully!");
+
+            if (created)
+            {
+                await Task.Delay(1200);
+                NavigationManager.NavigateTo("/auth/sign-in?registered=true");
             }
-
-            // 5. Create new user
-            await UserService.CreateUserAsync(trimmedEmail, password, name.Trim());
-
-            isRegisteredSuccess = true;
-            isLoading = false;
-
-            // Wait a moment and navigate to sign-in page
-            await Task.Delay(1200);
-            NavigationManager.NavigateTo("/auth/sign-in?registered=true");
         }
-        catch (MongoDB.Driver.MongoWriteException ex) when (ex.WriteError.Category == MongoDB.Driver.ServerErrorCategory.DuplicateKey)
+        finally
         {
-            generalError = "A user with this email address already exists.";
-            isLoading = false;
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Registration failed");
-            var message = ErrorMessages.ForUser(ex);
-            generalError = message == ErrorMessages.Generic
-                ? "An unexpected error occurred while creating your account. Please try again."
-                : message;
-            isLoading = false;
+            saving = false;
         }
     }
 }

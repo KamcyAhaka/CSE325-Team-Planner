@@ -3,6 +3,7 @@ using TeamProjectPlanner.Models;
 
 namespace TeamProjectPlanner.Services;
 
+/// <summary>Operations for managing project membership.</summary>
 public class ProjectMemberService
 {
     private readonly IMongoCollection<ProjectMember> _members;

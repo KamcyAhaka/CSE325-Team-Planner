@@ -7,7 +7,7 @@
         @attributes="AdditionalAttributes">
     @if (IsBusy)
     {
-        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        <span class="spinner" role="status" aria-hidden="true"></span>
         <span>@BusyText</span>
     }
     else
@@ -30,7 +30,7 @@
     public bool Disabled { get; set; }
 
     [Parameter]
-    public string Class { get; set; } = "btn btn-primary";
+    public string Class { get; set; } = "btn-submit";
 
     [Parameter(CaptureUnmatchedValues = true)]
     public Dictionary<string, object>? AdditionalAttributes { get; set; }

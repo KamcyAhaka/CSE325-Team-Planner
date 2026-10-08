@@ -1,133 +1,148 @@
+/* Board pages — page-specific styles only.
+   Shared form components (form-card, form-title, form-field, form-label,
+   form-input, form-textarea, btn-submit, validation-message) live in app.css. */
+
 .board-page {
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem 1rem;
 }
 
-.board-page-header {
+/* ===== Board workspace (task board) ===== */
+
+.board-workspace {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.board-header {
     margin-bottom: 1.5rem;
 }
 
-.board-page-title {
-    margin: 0 0 0.5rem;
-    color: #1e293b;
-    font-size: 2rem;
-    font-weight: 700;
+.board-header h1 {
+    margin: 0 0 0.25rem;
+    font-size: 1.5rem;
+    color: var(--color-foreground);
 }
 
-.board-page-subtitle {
+.board-header p {
     margin: 0;
-    color: #64748b;
+    color: var(--color-text-secondary);
 }
 
-.board-form-card {
-    padding: 2rem;
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+.board-task-form {
+    margin-bottom: 2rem;
 }
 
-.board-form-title {
-    margin: 0 0 1.5rem;
-    color: #1e293b;
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-.board-form {
+.board-due-date-field label {
     display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-}
-
-.board-form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.375rem;
-}
-
-.board-form-label {
-    color: #334155;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.board-form-input {
-    width: 100%;
-    min-height: 2.625rem;
-    padding: 0.5rem 0.875rem;
-    box-sizing: border-box;
-    color: #0f172a;
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
-    font-family: inherit;
-    font-size: 0.875rem;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.board-form-input:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
-
-.board-form-textarea {
-    min-height: 7rem;
-    resize: vertical;
-}
-
-.board-validation {
-    margin: 0;
-    color: #ef4444;
-    font-size: 0.875rem;
-}
-
-.board-success {
-    margin-bottom: 1.5rem;
-    padding: 0.75rem 1rem;
-    color: #16a34a;
-    background-color: rgba(34, 197, 94, 0.08);
-    border: 1px solid rgba(34, 197, 94, 0.25);
-    border-radius: 0.5rem;
-}
-
-.board-submit {
-    width: fit-content;
-    min-height: 2.625rem;
-    padding: 0 1.25rem;
-    color: #ffffff;
-    background-color: #2563eb;
-    border: none;
-    border-radius: 0.5rem;
-    font-family: inherit;
-    font-size: 0.875rem;
-    font-weight: 600;
+    align-items: center;
+    gap: 0.5rem;
     cursor: pointer;
-    transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.board-submit:hover {
-    background-color: #1d4ed8;
-    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
+.board-due-date-field input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--color-primary);
 }
 
-.board-submit:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+.board-columns {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: start;
+}
+
+.board-column {
+    padding: 1rem;
+    background: var(--color-hover);
+    border-radius: 0.75rem;
+}
+
+.board-column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.board-column-header h2 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--color-label);
+}
+
+.board-count {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-muted);
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+}
+
+.board-column-empty {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-muted);
+}
+
+.board-task-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.board-task-card:last-child {
+    margin-bottom: 0;
+}
+
+.board-task-card h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--color-foreground);
+}
+
+.board-task-card p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+.board-task-due {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+}
+
+.board-task-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.board-task-move-btn {
+    padding: 0.25rem 0.625rem;
+    font-size: 0.8125rem;
+}
+
+@media (max-width: 900px) {
+    .board-columns {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 640px) {
-    .board-page {
+    .board-page,
+    .board-workspace {
         padding: 1.5rem 1rem;
-    }
-
-    .board-form-card {
-        padding: 1.25rem;
-    }
-
-    .board-submit {
-        width: 100%;
     }
 }
