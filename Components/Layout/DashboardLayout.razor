@@ -1,7 +1,41 @@
 @inherits UserAwareLayout
 
 <div class="dashboard-shell">
-    <aside class="dashboard-sidebar">
+    <!-- Mobile Top Header (visible on mobile / tablet, hidden on desktop) -->
+    <header class="dashboard-mobile-header">
+        <div class="mobile-brand">
+            <div class="sidebar-logo">
+                <img src="favicon.svg" alt="Logo" />
+            </div>
+            <span class="mobile-brand-title">Team Planner</span>
+        </div>
+        <button type="button" class="mobile-menu-btn" @onclick="ToggleSidebar" aria-label="Toggle navigation">
+            @if (isSidebarOpen)
+            {
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            }
+            else
+            {
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            }
+        </button>
+    </header>
+
+    <!-- Mobile Backdrop Overlay -->
+    @if (isSidebarOpen)
+    {
+        <div class="sidebar-backdrop" @onclick="CloseSidebar"></div>
+    }
+
+    <!-- Sidebar (Fixed to the side on desktop, slide-over on mobile) -->
+    <aside class="dashboard-sidebar @(isSidebarOpen ? "sidebar-open" : "")">
         <div class="sidebar-brand">
             <div class="sidebar-logo">
                 <img src="favicon.svg" alt="Logo" />
@@ -13,19 +47,19 @@
         </div>
 
         <nav class="sidebar-nav">
-            <NavLink href="/dashboard" class="sidebar-link" Match="NavLinkMatch.All">
+            <NavLink href="/dashboard" class="sidebar-link" Match="NavLinkMatch.All" @onclick="CloseSidebar">
                 <span class="icon icon-dashboard"></span>
                 <span>Dashboard</span>
             </NavLink>
 
-            <NavLink href="/projects" class="sidebar-link" Match="NavLinkMatch.Prefix">
+            <NavLink href="/projects" class="sidebar-link" Match="NavLinkMatch.Prefix" @onclick="CloseSidebar">
                 <span class="icon icon-folder"></span>
                 <span>Projects</span>
             </NavLink>
         </nav>
 
         <div class="sidebar-create-wrap">
-            <a href="/projects" class="sidebar-create">
+            <a href="/projects" class="sidebar-create" @onclick="CloseSidebar">
                 <span class="icon icon-plus"></span>
                 <span>Create Project</span>
             </a>
@@ -52,6 +86,9 @@
     </main>
 </div>
 
+@code {
+    private bool isSidebarOpen = false;
 
-
-
+    private void ToggleSidebar() => isSidebarOpen = !isSidebarOpen;
+    private void CloseSidebar() => isSidebarOpen = false;
+}
