@@ -10,6 +10,8 @@
 
 @inject BoardService BoardService
 @inject TaskService TaskService
+@inject ProjectService ProjectService
+@inject ProjectMemberService ProjectMemberService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UiActionRunner Runner
 @inject NavigationManager NavigationManager
@@ -22,6 +24,10 @@
     @if (boardNotFound)
     {
         <div class="project-empty">Board not found.</div>
+    }
+    else if (noAccess)
+    {
+        <div class="project-empty">You don't have access to this board.</div>
     }
     else if (board is null)
     {
@@ -344,6 +350,7 @@
     private Board? board;
     private List<ProjectTask> tasks = new();
     private bool boardNotFound;
+    private bool noAccess;
     private bool saving;
     private ProjectTask newTask = new();
     private bool hasDueDate;
@@ -388,14 +395,24 @@
         if (board is null)
         {
             boardNotFound = true;
+            return;
         }
-        else
+
+        var project = await ProjectService.GetProjectByIdAsync(board.ProjectId);
+        var members = await ProjectMemberService.GetMembersByProjectAsync(board.ProjectId);
+
+        noAccess = project is null
+            || (project.OwnerId != userId && !members.Any(m => m.UserId == userId));
+
+        if (noAccess)
         {
-            newTask.ProjectId = board.ProjectId;
-            newTask.BoardId = board.Id;
-            newTask.OwnerId = userId;
-            await LoadTasks();
+            return;
         }
+
+        newTask.ProjectId = board.ProjectId;
+        newTask.BoardId = board.Id;
+        newTask.OwnerId = userId;
+        await LoadTasks();
     }
 
     private async Task LoadTasks()
