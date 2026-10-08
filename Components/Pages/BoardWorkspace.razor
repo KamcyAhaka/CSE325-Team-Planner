@@ -7,7 +7,9 @@
 @attribute [Authorize]
 
 @using System.Security.Claims
+@using Microsoft.JSInterop
 
+@inject IJSRuntime JS
 @inject BoardService BoardService
 @inject TaskService TaskService
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -180,7 +182,7 @@
             {
                 var columnTasks = tasks.Where(t => t.Status == column.Status).ToList();
 
-                <section class="board-column">
+                <section class="board-column" data-status="@column.Status.ToString()">
                     <header class="board-column-header">
                         <h2>@column.Label</h2>
                         <span class="board-count">@columnTasks.Count</span>
@@ -287,7 +289,7 @@
                         }
                         else
                         {
-                            <article class="board-task-card">
+                            <article class="board-task-card" draggable="true" data-task-id="@task.Id">
                                 <h3>@task.Title</h3>
 
                                 @if (!string.IsNullOrEmpty(task.Description))
@@ -337,12 +339,15 @@
     <ToastHost />
 </div>
 
+<script src="board-dnd.js"></script>
+
 @code {
     [Parameter]
     public string boardId { get; set; } = string.Empty;
 
     private Board? board;
     private List<ProjectTask> tasks = new();
+    private readonly HashSet<string> movingTaskIds = new();
     private bool boardNotFound;
     private bool saving;
     private ProjectTask newTask = new();
@@ -472,6 +477,59 @@
         {
             saving = false;
         }
+    }
+
+    private DotNetObjectReference<BoardWorkspace>? dndReference;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (board is not null && !boardNotFound)
+        {
+            dndReference ??= DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("boardDnd.init", dndReference);
+        }
+    }
+
+    [JSInvokable]
+    public Task OnTaskDropped(string taskId, string status)
+    {
+        if (!Enum.TryParse<ProjectTaskStatus>(status, out var parsed))
+        {
+            return Task.CompletedTask;
+        }
+
+        return InvokeAsync(async () =>
+        {
+            var task = tasks.FirstOrDefault(t => t.Id == taskId);
+            if (task is null || task.Status == parsed)
+            {
+                return;
+            }
+
+            // Optimistic update: move the card in memory immediately so the
+            // board re-renders without waiting for the round-trip, then persist.
+            var previousStatus = task.Status;
+            task.Status = parsed;
+            movingTaskIds.Add(taskId);
+            StateHasChanged();
+
+            try
+            {
+                var updated = await Runner.RunAsync(
+                    () => TaskService.UpdateTaskStatusAsync(taskId, parsed),
+                    "Task moved to " + GetStatusLabel(parsed));
+
+                if (!updated)
+                {
+                    task.Status = previousStatus;
+                }
+            }
+            finally
+            {
+                movingTaskIds.Remove(taskId);
+                StateHasChanged();
+            }
+        });
     }
 
     private void StartEditTask(ProjectTask task)
@@ -659,4 +717,10 @@
         string Label,
         ProjectTaskStatus Status,
         IReadOnlyList<ProjectTaskStatus> Moves);
+
+    public ValueTask DisposeAsync()
+    {
+        dndReference?.Dispose();
+        return ValueTask.CompletedTask;
+    }
 }
