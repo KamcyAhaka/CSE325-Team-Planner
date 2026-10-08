@@ -63,20 +63,124 @@
             </div>
 
             <div class="project-header-side">
-                <span class="project-members-label">
-                    Team Members (@team.Count)
-                </span>
+                <div class="project-members-header">
+                    <span class="project-members-label">
+                        Team Members (@team.Count)
+                    </span>
+
+                    @if (userId == project.OwnerId)
+                    {
+                        <button type="button"
+                                class="btn btn-outline-secondary card-action-btn"
+                                disabled="@(removingMemberBusy || addingMemberBusy)"
+                                @onclick="ToggleAddMember">
+                            @(showAddMember ? "Close" : "Add Member")
+                        </button>
+                    }
+                </div>
 
                 <div class="project-members">
                     @foreach (var person in team)
                     {
                         var name = GetUserName(person.UserId);
 
-                        <span class="avatar avatar-sm"
-                              title="@name (@person.Role)">
-                            @UserInfo.GetInitials(name)
-                        </span>
+                        if (removingMember?.UserId == person.UserId)
+                        {
+                            <div class="member-row card-confirm">
+                                <span class="avatar avatar-sm">
+                                    @UserInfo.GetInitials(name)
+                                </span>
+                                <span class="member-name">@name</span>
+                                <span>Remove from this project?</span>
+
+                                <button type="button"
+                                        class="btn btn-danger card-action-btn"
+                                        disabled="@removingMemberBusy"
+                                        @onclick="RemoveMember">
+                                    @(removingMemberBusy ? "Removing..." : "Yes, remove")
+                                </button>
+                                <button type="button"
+                                        class="btn btn-outline-secondary card-action-btn"
+                                        disabled="@removingMemberBusy"
+                                        @onclick="CancelRemoveMember">
+                                    No
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="member-row">
+                                <span class="avatar avatar-sm">
+                                    @UserInfo.GetInitials(name)
+                                </span>
+                                <span class="member-name">@name</span>
+                                <span class="member-role">@person.Role</span>
+
+                                @if (userId == project.OwnerId && person.MemberId is not null)
+                                {
+                                    <button type="button"
+                                            class="btn btn-danger card-action-btn member-remove-btn"
+                                            disabled="@removingMemberBusy"
+                                            title="Remove @name from this project"
+                                            @onclick="() => StartRemoveMember(person)">
+                                        Remove
+                                    </button>
+                                }
+                            </div>
+                        }
                     }
+
+                    <div class="@(showAddMember ? "add-member-wrap open" : "add-member-wrap")">
+                        <div class="add-member-form">
+                            <div class="form-field">
+                                <label for="memberSearch" class="form-label">Search by name or email</label>
+                                <input id="memberSearch"
+                                       type="text"
+                                       class="form-input"
+                                       placeholder="Type to search..."
+                                       value="@addMemberQuery"
+                                       disabled="@addingMemberBusy"
+                                       @oninput="OnMemberSearchInput" />
+
+                                <div class="member-suggestions">
+                                    @if (userSuggestions.Count > 0)
+                                    {
+                                        @foreach (var user in userSuggestions)
+                                        {
+                                            <button type="button"
+                                                    class="member-suggestion"
+                                                    disabled="@addingMemberBusy"
+                                                    @onclick="() => SelectSuggestedUser(user)">
+                                                <span class="avatar avatar-sm">
+                                                    @UserInfo.GetInitials(user.DisplayName)
+                                                </span>
+                                                <span class="member-name">@user.DisplayName</span>
+                                                <span class="member-role">@user.Email</span>
+                                            </button>
+                                        }
+                                    }
+                                    else if (addMemberQuery.Trim().Length >= 2 && !addingMemberBusy)
+                                    {
+                                        <p class="form-hint member-suggestion-empty">No users found. Select a suggestion above to enable Add.</p>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="card-actions">
+                                <button type="button"
+                                        class="btn btn-primary card-action-btn"
+                                        disabled="@(selectedUser is null || addingMemberBusy)"
+                                        @onclick="AddMember">
+                                    @(addingMemberBusy ? "Adding..." : "Add")
+                                </button>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(addMemberError))
+                            {
+                                <p class="form-validation">@addMemberError</p>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -268,13 +372,13 @@
 
         var members = await ProjectMemberService.GetMembersByProjectAsync(projectId);
 
-        team = new List<TeamPerson> { new(project.OwnerId, "Owner") };
+        team = new List<TeamPerson> { new(project.OwnerId, null, "Owner") };
 
         foreach (var member in members)
         {
             if (member.UserId != project.OwnerId)
             {
-                team.Add(new(member.UserId, GetRoleLabel(member.Role)));
+                team.Add(new(member.UserId, member.Id, GetRoleLabel(member.Role)));
             }
         }
 
@@ -385,6 +489,185 @@
         }
     }
 
+    private TeamPerson? removingMember;
+    private bool removingMemberBusy;
+
+    private bool showAddMember;
+    private string addMemberQuery = string.Empty;
+    private List<AppUser> userSuggestions = new();
+    private AppUser? selectedUser;
+    private string? addMemberError;
+    private bool addingMemberBusy;
+    private CancellationTokenSource? searchCts;
+
+    private void StartRemoveMember(TeamPerson person)
+    {
+        if (person.MemberId is null || removingMemberBusy)
+        {
+            return;
+        }
+
+        removingMember = person;
+    }
+
+    private void CancelRemoveMember()
+    {
+        removingMember = null;
+    }
+
+    private async Task RemoveMember()
+    {
+        if (removingMember?.MemberId is null || removingMemberBusy)
+        {
+            return;
+        }
+
+        removingMemberBusy = true;
+
+        try
+        {
+            var removed = await Runner.RunAsync(
+                () => ProjectMemberService.RemoveMemberAsync(removingMember.MemberId!),
+                "Member removed successfully!");
+
+            if (removed)
+            {
+                removingMember = null;
+                await LoadTeam();
+            }
+        }
+        finally
+        {
+            removingMemberBusy = false;
+        }
+    }
+
+    private async Task LoadTeam()
+    {
+        if (project is null)
+        {
+            return;
+        }
+
+        var members = await ProjectMemberService.GetMembersByProjectAsync(project.Id);
+
+        team = new List<TeamPerson> { new(project.OwnerId, null, "Owner") };
+
+        foreach (var member in members)
+        {
+            if (member.UserId != project.OwnerId)
+            {
+                team.Add(new(member.UserId, member.Id, GetRoleLabel(member.Role)));
+            }
+        }
+
+        var ids = team.Select(p => p.UserId).ToList();
+        usersById = await UserService.GetUsersByIdsAsync(ids);
+    }
+
+    private void ToggleAddMember()
+    {
+        showAddMember = !showAddMember;
+
+        if (!showAddMember)
+        {
+            ResetAddMemberForm();
+        }
+    }
+
+    private void ResetAddMemberForm()
+    {
+        searchCts?.Cancel();
+        addMemberQuery = string.Empty;
+        userSuggestions = new List<AppUser>();
+        selectedUser = null;
+        addMemberError = null;
+    }
+
+    private async Task OnMemberSearchInput(ChangeEventArgs e)
+    {
+        addMemberQuery = e.Value?.ToString() ?? string.Empty;
+        selectedUser = null;
+        addMemberError = null;
+
+        searchCts?.Cancel();
+        searchCts = new CancellationTokenSource();
+        var token = searchCts.Token;
+
+        try
+        {
+            await Task.Delay(300, token);
+            await SearchUsers(token);
+        }
+        catch (OperationCanceledException)
+        {
+            // A newer keystroke superseded this search.
+        }
+    }
+
+    private async Task SearchUsers(CancellationToken token)
+    {
+        if (addMemberQuery.Trim().Length < 2)
+        {
+            userSuggestions = new List<AppUser>();
+            StateHasChanged();
+            return;
+        }
+
+        var results = await UserService.SearchUsersAsync(addMemberQuery);
+
+        var teamIds = team.Select(p => p.UserId).ToHashSet();
+        userSuggestions = results.Where(u => !teamIds.Contains(u.Id)).ToList();
+
+        if (token.IsCancellationRequested)
+        {
+            return;
+        }
+
+        StateHasChanged();
+    }
+
+    private void SelectSuggestedUser(AppUser user)
+    {
+        selectedUser = user;
+        addMemberQuery = user.Email;
+        userSuggestions = new List<AppUser>();
+        addMemberError = null;
+    }
+
+    private async Task AddMember()
+    {
+        if (project is null || selectedUser is null || addingMemberBusy)
+        {
+            return;
+        }
+
+        addingMemberBusy = true;
+
+        try
+        {
+            var added = await Runner.RunAsync(
+                () => ProjectMemberService.AddMemberAsync(new ProjectMember
+                {
+                    ProjectId = project.Id,
+                    UserId = selectedUser.Id,
+                    Role = ProjectRole.Member,
+                    JoinedAt = DateTime.UtcNow
+                }),
+                "Member added successfully!");
+
+            if (added)
+            {
+                ResetAddMemberForm();
+                await LoadTeam();
+            }
+        }
+        finally
+        {
+            addingMemberBusy = false;
+        }
+    }
+
     private int ProgressPercent =>
         tasks.Count == 0
             ? 0
@@ -421,5 +704,8 @@
         _ => "Member",
     };
 
-    private sealed record TeamPerson(string UserId, string Role);
+    private sealed record TeamPerson(
+        string UserId,
+        string? MemberId,
+        string Role);
 }

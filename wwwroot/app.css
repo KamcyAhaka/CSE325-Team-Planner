@@ -242,6 +242,12 @@ body {
     font-size: 0.8125rem;
 }
 
+.form-hint {
+    margin-top: 0.5rem;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+}
+
 .form-validation {
     margin-bottom: 1.25rem;
     padding: 0.875rem 1rem;

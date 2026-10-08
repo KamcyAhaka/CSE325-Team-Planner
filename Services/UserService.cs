@@ -1,4 +1,6 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using TeamProjectPlanner.Models;
 
@@ -61,6 +63,24 @@ public class UserService
         return await _users
             .Find(user => user.Email == normalizedEmail)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<List<AppUser>> SearchUsersAsync(string query)
+    {
+        var normalized = query.Trim().ToLowerInvariant();
+
+        if (normalized.Length == 0)
+        {
+            return new List<AppUser>();
+        }
+
+        // Case-insensitive regex so the query matches both the lowercase email and the display name.
+        var pattern = new BsonRegularExpression(Regex.Escape(normalized), "i");
+        var filter = Builders<AppUser>.Filter.Or(
+            Builders<AppUser>.Filter.Regex(u => u.Email, pattern),
+            Builders<AppUser>.Filter.Regex(u => u.DisplayName, pattern));
+
+        return await _users.Find(filter).Limit(10).ToListAsync();
     }
 
     public async Task<Dictionary<string, AppUser>> GetUsersByIdsAsync(
