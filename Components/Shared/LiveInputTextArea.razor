@@ -1,0 +1,13 @@
+@inherits InputBase<string>
+@using System.Diagnostics.CodeAnalysis
+
+<textarea @bind="CurrentValueAsString" @bind:event="oninput" class="@CssClass" @attributes="AdditionalAttributes"></textarea>
+
+@code {
+    protected override bool TryParseValueFromString(string? value, [MaybeNullWhen(false)] out string result, [NotNullWhen(false)] out string? validationErrorMessage)
+    {
+        result = value ?? string.Empty;
+        validationErrorMessage = null;
+        return true;
+    }
+}

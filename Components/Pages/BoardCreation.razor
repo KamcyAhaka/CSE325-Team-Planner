@@ -59,9 +59,9 @@ Create a board for one of your projects." />
                         Board Name
                     </label>
 
-                    <InputText id="boardName"
-                               class="form-input"
-                               @bind-Value="board.Name" />
+                    <LiveInputText id="boardName"
+                                   class="form-input"
+                                   @bind-Value="board.Name" />
                     <ValidationMessage For="() => board.Name" />
                 </div>
 
@@ -70,9 +70,9 @@ Create a board for one of your projects." />
                         Description
                     </label>
 
-                    <InputTextArea id="boardDescription"
-                                   class="form-input form-textarea"
-                                   @bind-Value="board.Description" />
+                    <LiveInputTextArea id="boardDescription"
+                                       class="form-input form-textarea"
+                                       @bind-Value="board.Description" />
                     <ValidationMessage For="() => board.Description" />
                 </div>
 

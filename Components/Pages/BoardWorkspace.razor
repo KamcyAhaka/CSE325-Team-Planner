@@ -58,17 +58,17 @@
 
                 <div class="form-field">
                     <label for="taskTitle" class="form-label">Task Title</label>
-                    <InputText id="taskTitle"
-                               class="form-input"
-                               @bind-Value="newTask.Title" />
+                    <LiveInputText id="taskTitle"
+                                   class="form-input"
+                                   @bind-Value="newTask.Title" />
                     <ValidationMessage For="() => newTask.Title" />
                 </div>
 
                 <div class="form-field">
                     <label for="taskDescription" class="form-label">Description</label>
-                    <InputTextArea id="taskDescription"
-                                   class="form-input form-textarea"
-                                   @bind-Value="newTask.Description" />
+                    <LiveInputTextArea id="taskDescription"
+                                       class="form-input form-textarea"
+                                       @bind-Value="newTask.Description" />
                     <ValidationMessage For="() => newTask.Description" />
                 </div>
 
