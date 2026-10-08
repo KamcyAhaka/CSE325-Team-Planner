@@ -108,33 +108,141 @@
 
                     @foreach (var task in columnTasks)
                     {
-                        <article class="board-task-card">
-                            <h3>@task.Title</h3>
+                        if (editingTaskId == task.Id)
+                        {
+                            <article class="board-task-card">
+                                <h3>Edit Task</h3>
 
-                            @if (!string.IsNullOrEmpty(task.Description))
-                            {
-                                <p>@task.Description</p>
-                            }
+                                <EditForm Model="@editTask"
+                                          OnValidSubmit="@UpdateTask"
+                                          FormName="edit-task">
 
-                            @if (task.DueDate is not null)
-                            {
-                                <span class="board-task-due">
-                                    Due @task.DueDate.Value.ToString("M/d/yyyy")
-                                </span>
-                            }
+                                    <DataAnnotationsValidator />
 
-                            <div class="board-task-actions">
-                                @foreach (var target in column.Moves)
-                                {
+                                    <ValidationSummary class="form-validation" />
+
+                                    <div class="form-field">
+                                        <label for="editTaskTitle" class="form-label">Task Title</label>
+                                        <LiveInputText id="editTaskTitle"
+                                                       class="form-input"
+                                                       @bind-Value="editTask.Title" />
+                                        <ValidationMessage For="() => editTask.Title" />
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label for="editTaskDescription" class="form-label">Description</label>
+                                        <LiveInputTextArea id="editTaskDescription"
+                                                           class="form-input form-textarea"
+                                                           @bind-Value="editTask.Description" />
+                                        <ValidationMessage For="() => editTask.Description" />
+                                    </div>
+
+                                    <div class="form-field board-due-date-field">
+                                        <label for="editHasDueDate" class="form-label">
+                                            <input type="checkbox" id="editHasDueDate" @bind="editHasDueDate" />
+                                            Set a due date
+                                        </label>
+
+                                        @if (editHasDueDate)
+                                        {
+                                            <InputDate id="editTaskDueDate"
+                                                       class="form-input"
+                                                       @bind-Value="editDueDate" />
+                                        }
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label for="editTaskStatus" class="form-label">Status</label>
+                                        <select id="editTaskStatus"
+                                                class="form-input"
+                                                @bind="editTask.Status">
+                                            <option value="@ProjectTaskStatus.ToDo">To Do</option>
+                                            <option value="@ProjectTaskStatus.InProgress">In Progress</option>
+                                            <option value="@ProjectTaskStatus.Done">Done</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="card-actions">
+                                        <SubmitButton Text="Save Changes"
+                                                      Class="btn btn-primary card-action-btn"
+                                                      IsBusy="@saving" />
+                                        <button type="button"
+                                                class="btn btn-outline-secondary card-action-btn"
+                                                disabled="@saving"
+                                                @onclick="CancelEditTask">
+                                            Cancel
+                                        </button>
+                                    </div>
+
+                                </EditForm>
+                            </article>
+                        }
+                        else if (deletingTaskId == task.Id)
+                        {
+                            <article class="board-task-card">
+                                <h3>@task.Title</h3>
+
+                                <p>Delete this task?</p>
+
+                                <div class="card-confirm">
                                     <button type="button"
-                                            class="btn btn-outline-secondary board-task-move-btn"
-                                            disabled="@saving"
-                                            @onclick="() => UpdateTaskStatus(task.Id, target)">
-                                        Move to @GetStatusLabel(target)
+                                            class="btn btn-danger card-action-btn"
+                                            disabled="@deletingTask"
+                                            @onclick="DeleteTask">
+                                        @(deletingTask ? "Deleting..." : "Yes, delete")
                                     </button>
+                                    <button type="button"
+                                            class="btn btn-outline-secondary card-action-btn"
+                                            disabled="@deletingTask"
+                                            @onclick="CancelDeleteTask">
+                                        No
+                                    </button>
+                                </div>
+                            </article>
+                        }
+                        else
+                        {
+                            <article class="board-task-card">
+                                <h3>@task.Title</h3>
+
+                                @if (!string.IsNullOrEmpty(task.Description))
+                                {
+                                    <p>@task.Description</p>
                                 }
-                            </div>
-                        </article>
+
+                                @if (task.DueDate is not null)
+                                {
+                                    <span class="board-task-due">
+                                        Due @task.DueDate.Value.ToString("M/d/yyyy")
+                                    </span>
+                                }
+
+                                <div class="board-task-actions">
+                                    @foreach (var target in column.Moves)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-outline-secondary board-task-move-btn"
+                                                disabled="@saving"
+                                                @onclick="() => UpdateTaskStatus(task.Id, target)">
+                                            Move to @GetStatusLabel(target)
+                                        </button>
+                                    }
+                                </div>
+
+                                <div class="board-task-actions">
+                                    <button type="button"
+                                            class="btn btn-outline-secondary card-action-btn"
+                                            @onclick="() => StartEditTask(task)">
+                                        Edit
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-danger card-action-btn"
+                                            @onclick="() => StartDeleteTask(task)">
+                                        Delete
+                                    </button>
+                                </div>
+                            </article>
+                        }
                     }
                 </section>
             }
@@ -156,6 +264,14 @@
     private bool hasDueDate;
     private DateTime dueDate = DateTime.Today;
     private string userId = string.Empty;
+
+    private string? editingTaskId;
+    private ProjectTask editTask = new();
+    private bool editHasDueDate;
+    private DateTime editDueDate = DateTime.Today;
+
+    private string? deletingTaskId;
+    private bool deletingTask;
 
     private static readonly TaskColumn[] Columns =
     [
@@ -263,6 +379,95 @@
         finally
         {
             saving = false;
+        }
+    }
+
+    private void StartEditTask(ProjectTask task)
+    {
+        editingTaskId = task.Id;
+        editTask = new ProjectTask
+        {
+            Id = task.Id,
+            ProjectId = task.ProjectId,
+            BoardId = task.BoardId,
+            OwnerId = task.OwnerId,
+            Title = task.Title,
+            Description = task.Description ?? string.Empty,
+            Status = task.Status,
+            CreatedAt = task.CreatedAt
+        };
+        editHasDueDate = task.DueDate is not null;
+        editDueDate = task.DueDate ?? DateTime.Today;
+    }
+
+    private void CancelEditTask()
+    {
+        editingTaskId = null;
+    }
+
+    private async Task UpdateTask()
+    {
+        if (editingTaskId is null || saving)
+        {
+            return;
+        }
+
+        saving = true;
+
+        try
+        {
+            editTask.DueDate = editHasDueDate ? editDueDate : null;
+
+            var updated = await Runner.RunAsync(
+                () => TaskService.UpdateTaskAsync(editTask),
+                "Task updated successfully!");
+
+            if (updated)
+            {
+                editingTaskId = null;
+                await LoadTasks();
+            }
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private void StartDeleteTask(ProjectTask task)
+    {
+        deletingTaskId = task.Id;
+    }
+
+    private void CancelDeleteTask()
+    {
+        deletingTaskId = null;
+    }
+
+    private async Task DeleteTask()
+    {
+        if (deletingTaskId is null || deletingTask)
+        {
+            return;
+        }
+
+        deletingTask = true;
+
+        try
+        {
+            var deleted = await Runner.RunAsync(
+                () => TaskService.DeleteTaskAsync(deletingTaskId),
+                "Task deleted successfully!");
+
+            if (deleted)
+            {
+                deletingTaskId = null;
+                await LoadTasks();
+            }
+        }
+        finally
+        {
+            deletingTask = false;
         }
     }
 
