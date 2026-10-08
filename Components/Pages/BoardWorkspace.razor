@@ -311,18 +311,6 @@
                                 }
 
                                 <div class="board-task-actions">
-                                    @foreach (var target in column.Moves)
-                                    {
-                                        <button type="button"
-                                                class="btn btn-outline-secondary board-task-move-btn"
-                                                disabled="@saving"
-                                                @onclick="() => UpdateTaskStatus(task.Id, target)">
-                                            Move to @GetStatusLabel(target)
-                                        </button>
-                                    }
-                                </div>
-
-                                <div class="board-task-actions">
                                     <button type="button"
                                             class="btn btn-outline-secondary card-action-btn"
                                             @onclick="() => StartEditTask(task)">
@@ -379,12 +367,9 @@
 
     private static readonly TaskColumn[] Columns =
     [
-        new("To Do", ProjectTaskStatus.ToDo,
-            [ProjectTaskStatus.InProgress, ProjectTaskStatus.Done]),
-        new("In Progress", ProjectTaskStatus.InProgress,
-            [ProjectTaskStatus.ToDo, ProjectTaskStatus.Done]),
-        new("Done", ProjectTaskStatus.Done,
-            [ProjectTaskStatus.ToDo, ProjectTaskStatus.InProgress]),
+        new("To Do", ProjectTaskStatus.ToDo),
+        new("In Progress", ProjectTaskStatus.InProgress),
+        new("Done", ProjectTaskStatus.Done),
     ];
 
     protected override async Task OnInitializedAsync()
@@ -459,34 +444,6 @@
                 };
                 hasDueDate = false;
                 dueDate = DateTime.Today;
-                await LoadTasks();
-            }
-        }
-        finally
-        {
-            saving = false;
-        }
-    }
-
-    private async Task UpdateTaskStatus(
-        string taskId,
-        ProjectTaskStatus status)
-    {
-        if (saving)
-        {
-            return;
-        }
-
-        saving = true;
-
-        try
-        {
-            var updated = await Runner.RunAsync(
-                () => TaskService.UpdateTaskStatusAsync(taskId, status),
-                "Task moved to " + GetStatusLabel(status));
-
-            if (updated)
-            {
                 await LoadTasks();
             }
         }
@@ -730,10 +687,7 @@
         _ => "Done",
     };
 
-    private readonly record struct TaskColumn(
-        string Label,
-        ProjectTaskStatus Status,
-        IReadOnlyList<ProjectTaskStatus> Moves);
+    private readonly record struct TaskColumn(string Label, ProjectTaskStatus Status);
 
     public ValueTask DisposeAsync()
     {
