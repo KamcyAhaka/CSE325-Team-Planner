@@ -28,6 +28,13 @@
     }
     else
     {
+        <div class="workspace-top-row">
+            <a href="/projects/@board.ProjectId" class="back-link">
+                <span class="icon icon-arrow-left icon-sm"></span>
+                Back to Project
+            </a>
+        </div>
+
         <div class="board-header">
             <h1>@board.Name</h1>
 
@@ -176,6 +183,9 @@
         }
         else
         {
+            newTask.ProjectId = board.ProjectId;
+            newTask.BoardId = board.Id;
+            newTask.OwnerId = userId;
             await LoadTasks();
         }
     }
@@ -184,7 +194,7 @@
     {
         if (board is not null)
         {
-            tasks = await TaskService.GetTasksByProjectAsync(board.ProjectId);
+            tasks = await TaskService.GetTasksByBoardAsync(board.Id);
         }
     }
 
@@ -200,6 +210,7 @@
         try
         {
             newTask.ProjectId = board.ProjectId;
+            newTask.BoardId = board.Id;
             newTask.OwnerId = userId;
             newTask.Status = ProjectTaskStatus.ToDo;
             newTask.DueDate = hasDueDate ? dueDate : null;
@@ -210,7 +221,12 @@
 
             if (created)
             {
-                newTask = new ProjectTask();
+                newTask = new ProjectTask
+                {
+                    ProjectId = board.ProjectId,
+                    BoardId = board.Id,
+                    OwnerId = userId
+                };
                 hasDueDate = false;
                 dueDate = DateTime.Today;
                 await LoadTasks();

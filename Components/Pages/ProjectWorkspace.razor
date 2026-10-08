@@ -1,0 +1,260 @@
+@page "/projects/{projectId}"
+
+@layout DashboardLayout
+
+@rendermode InteractiveServer
+
+@attribute [Authorize]
+
+@using System.Security.Claims
+
+@inject ProjectService ProjectService
+@inject BoardService BoardService
+@inject TaskService TaskService
+@inject ProjectMemberService ProjectMemberService
+@inject UserService UserService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Project Workspace</PageTitle>
+
+<DashboardHeader Title="Project Workspace" Subtitle="Manage the tasks and team for this project." />
+
+<div class="project-workspace">
+    @if (notFound)
+    {
+        <div class="project-empty">Project not found.</div>
+    }
+    else if (noAccess)
+    {
+        <div class="project-empty">You don't have access to this project.</div>
+    }
+    else if (project is null)
+    {
+        <div class="project-empty">Loading project...</div>
+    }
+    else
+    {
+        <div class="workspace-top-row">
+            <a href="/dashboard" class="back-link">
+                <span class="icon icon-arrow-left icon-sm"></span>
+                Back to Dashboard
+            </a>
+
+            <a href="/boards/create?projectId=@project.Id" class="view-all-link">
+                <span class="icon icon-plus icon-sm"></span>
+                Create Board
+            </a>
+        </div>
+
+        <div class="project-header-card">
+            <div class="project-header-main">
+                <div class="project-header-meta">
+                    <span class="project-badge">@GetProjectStatus(project)</span>
+
+                    <span class="project-date">
+                        <span class="icon icon-calendar icon-xs"></span>
+                        Due @project.EndDate.ToString("M/d/yyyy")
+                    </span>
+                </div>
+
+                <h2>@project.Name</h2>
+                <p class="project-header-desc">@project.Description</p>
+            </div>
+
+            <div class="project-header-side">
+                <span class="project-members-label">
+                    Team Members (@team.Count)
+                </span>
+
+                <div class="project-members">
+                    @foreach (var person in team)
+                    {
+                        var name = GetUserName(person.UserId);
+
+                        <span class="avatar avatar-sm"
+                              title="@name (@person.Role)">
+                            @UserInfo.GetInitials(name)
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="workspace-stats">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-primary">
+                    <span class="icon icon-square-check"></span>
+                </div>
+
+                <div class="stat-info">
+                    <span class="stat-label">Project Progress</span>
+                    <span class="stat-value">@ProgressPercent% Complete</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-blue">
+                    <span class="icon icon-folder"></span>
+                </div>
+
+                <div class="stat-info">
+                    <span class="stat-label">Total Tasks</span>
+                    <span class="stat-value">@tasks.Count Active: @ActiveCount</span>
+                </div>
+            </div>
+        </div>
+
+        <section class="task-board-section">
+            <div class="section-header">
+                <h3 class="section-title">Task Boards</h3>
+            </div>
+
+            @if (boards.Count == 0)
+            {
+                <div class="empty-state task-empty">
+                    <span class="empty-icon icon-folder"></span>
+                    <p>No boards yet. Create your first board to start organizing tasks.</p>
+                </div>
+            }
+            else
+            {
+                <div class="projects-grid">
+                    @foreach (var board in boards)
+                    {
+                        var boardTasks = tasks.Where(t => t.BoardId == board.Id).ToList();
+
+                        <article class="project-card">
+                            <div class="project-card-top">
+                                <span class="project-badge">@boardTasks.Count</span>
+                                <span class="project-date">tasks</span>
+                            </div>
+
+                            <h3 class="project-name">@board.Name</h3>
+
+                            @if (!string.IsNullOrEmpty(board.Description))
+                            {
+                                <p class="project-desc">@board.Description</p>
+                            }
+
+                            <div class="project-card-bottom">
+                                <a href="/boards/@board.Id" class="view-workspace-link">
+                                    Open Board
+                                    <span class="icon icon-arrow-right icon-sm"></span>
+                                </a>
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+
+        </section>
+    }
+
+    <ToastHost />
+</div>
+
+@code {
+    [Parameter]
+    public string projectId { get; set; } = string.Empty;
+
+    private Project? project;
+    private List<Board> boards = new();
+    private List<ProjectTask> tasks = new();
+    private List<TeamPerson> team = new();
+    private Dictionary<string, AppUser> usersById = new();
+    private bool notFound;
+    private bool noAccess;
+    private string userId = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? string.Empty;
+
+        project = await ProjectService.GetProjectByIdAsync(projectId);
+
+        if (project is null)
+        {
+            notFound = true;
+            return;
+        }
+
+        var members = await ProjectMemberService.GetMembersByProjectAsync(projectId);
+
+        team = new List<TeamPerson> { new(project.OwnerId, "Owner") };
+
+        foreach (var member in members)
+        {
+            if (member.UserId != project.OwnerId)
+            {
+                team.Add(new(member.UserId, GetRoleLabel(member.Role)));
+            }
+        }
+
+        noAccess = project.OwnerId != userId
+            && !members.Any(m => m.UserId == userId);
+
+        if (noAccess)
+        {
+            return;
+        }
+
+        await LoadTasks();
+
+        var ids = team.Select(p => p.UserId)
+            .Concat(tasks.Select(t => t.OwnerId))
+            .ToList();
+
+        usersById = await UserService.GetUsersByIdsAsync(ids);
+    }
+
+    private async Task LoadTasks()
+    {
+        if (project is not null)
+        {
+            boards = await BoardService.GetBoardsByProjectAsync(project.Id);
+            tasks = await TaskService.GetTasksByProjectAsync(project.Id);
+        }
+    }
+
+    private int ProgressPercent =>
+        tasks.Count == 0
+            ? 0
+            : (int)Math.Round(100.0 * tasks.Count(t => t.Status == ProjectTaskStatus.Done) / tasks.Count);
+
+    private int ActiveCount =>
+        tasks.Count(t => t.Status != ProjectTaskStatus.Done);
+
+    private string GetUserName(string id) =>
+        usersById.TryGetValue(id, out var user)
+            ? user.DisplayName
+            : "Unknown";
+
+    private static string GetProjectStatus(Project p)
+    {
+        var now = DateTime.Now;
+
+        if (p.EndDate < now)
+        {
+            return "completed";
+        }
+
+        if (p.StartDate > now)
+        {
+            return "planning";
+        }
+
+        return "active";
+    }
+
+    private static string GetRoleLabel(ProjectRole role) => role switch
+    {
+        ProjectRole.Owner => "Owner",
+        _ => "Member",
+    };
+
+    private sealed record TeamPerson(string UserId, string Role);
+}

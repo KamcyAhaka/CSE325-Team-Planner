@@ -63,6 +63,26 @@ public class UserService
             .FirstOrDefaultAsync();
     }
 
+    public async Task<Dictionary<string, AppUser>> GetUsersByIdsAsync(
+        IEnumerable<string> userIds)
+    {
+        var ids = userIds
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Distinct()
+            .ToList();
+
+        if (ids.Count == 0)
+        {
+            return new Dictionary<string, AppUser>();
+        }
+
+        var users = await _users
+            .Find(user => ids.Contains(user.Id))
+            .ToListAsync();
+
+        return users.ToDictionary(user => user.Id);
+    }
+
     public async Task<AppUser> CreateUserAsync(string email, string password, string displayName)
     {
         if (string.IsNullOrWhiteSpace(email))

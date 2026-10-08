@@ -28,6 +28,9 @@ public class ProjectTask
 
     public string ProjectId { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "Board is required.")]
+    public string BoardId { get; set; } = string.Empty;
+
     public string OwnerId { get; set; } = string.Empty;
 
     public ProjectTaskStatus Status { get; set; }

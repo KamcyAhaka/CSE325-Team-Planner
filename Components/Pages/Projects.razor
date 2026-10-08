@@ -133,7 +133,13 @@ Create and manage your projects." />
 
     protected override async Task OnInitializedAsync()
     {
-        projects = await ProjectService.GetProjectsAsync();
+        var authenticationState = await AuthenticationStateProvider
+            .GetAuthenticationStateAsync();
+
+        var userId = authenticationState.User
+            .FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+
+        projects = await ProjectService.GetProjectsForUserAsync(userId);
     }
 
     private async Task CreateProject()
@@ -155,7 +161,8 @@ Create and manage your projects." />
             if (created)
             {
                 project = new Project();
-                projects = await ProjectService.GetProjectsAsync();
+                projects = await ProjectService
+                    .GetProjectsForUserAsync(project.OwnerId);
             }
         }
         finally

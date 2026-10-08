@@ -36,6 +36,20 @@ public class TaskService
         return await _tasks.Find(filter).ToListAsync();
     }
 
+    public async Task<List<ProjectTask>> GetTasksByBoardAsync(string boardId)
+    {
+        if (string.IsNullOrWhiteSpace(boardId))
+        {
+            throw new ArgumentException(
+                "Board id is required.",
+                nameof(boardId));
+        }
+
+        var filter = Builders<ProjectTask>.Filter.Eq(task => task.BoardId, boardId);
+
+        return await _tasks.Find(filter).ToListAsync();
+    }
+
     public async Task UpdateTaskStatusAsync(string taskId, ProjectTaskStatus status)
     {
         if (string.IsNullOrWhiteSpace(taskId))
