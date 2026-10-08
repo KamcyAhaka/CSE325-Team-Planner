@@ -35,7 +35,7 @@ Create and manage your projects." />
                         Project Name
                     </label>
 
-                    <InputText id="projectName" class="form-input" @bind-Value="project.Name" />
+                    <LiveInputText id="projectName" class="form-input" @bind-Value="project.Name" />
                     <ValidationMessage For="() => project.Name" />
                 </div>
 
@@ -44,8 +44,8 @@ Create and manage your projects." />
                         Description
                     </label>
 
-                    <InputTextArea id="projectDescription" class="form-input form-textarea"
-                                   @bind-Value="project.Description" />
+                    <LiveInputTextArea id="projectDescription" class="form-input form-textarea"
+                                       @bind-Value="project.Description" />
                     <ValidationMessage For="() => project.Description" />
                 </div>
 
