@@ -3,15 +3,19 @@ using TeamProjectPlanner.Models;
 
 namespace TeamProjectPlanner.Services;
 
-/// <summary>Operations for creating and listing projects.</summary>
+/// <summary>CRUD operations for projects.</summary>
 public class ProjectService
 {
     private readonly IMongoCollection<Project> _projects;
+    private readonly IMongoCollection<Board> _boards;
+    private readonly IMongoCollection<ProjectTask> _tasks;
     private readonly IMongoCollection<ProjectMember> _members;
 
     public ProjectService(IMongoDatabase database)
     {
         _projects = database.GetCollection<Project>("Projects");
+        _boards = database.GetCollection<Board>("Boards");
+        _tasks = database.GetCollection<ProjectTask>("Tasks");
         _members = database.GetCollection<ProjectMember>("ProjectMembers");
     }
 
@@ -53,5 +57,45 @@ public class ProjectService
         return await _projects
             .Find(p => p.Id == projectId)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task UpdateProjectAsync(Project project)
+    {
+        EntityValidator.EnsureValid(project);
+
+        var filter = Builders<Project>.Filter.Eq(p => p.Id, project.Id);
+        var update = Builders<Project>.Update
+            .Set(p => p.Name, project.Name)
+            .Set(p => p.Description, project.Description)
+            .Set(p => p.StartDate, project.StartDate)
+            .Set(p => p.EndDate, project.EndDate);
+
+        var result = await _projects.UpdateOneAsync(filter, update);
+
+        if (result.MatchedCount == 0)
+        {
+            throw new AppValidationException("Project not found.");
+        }
+    }
+
+    public async Task DeleteProjectAsync(string projectId)
+    {
+        if (string.IsNullOrWhiteSpace(projectId))
+        {
+            throw new ArgumentException(
+                "Project id is required.",
+                nameof(projectId));
+        }
+
+        var result = await _projects.DeleteOneAsync(p => p.Id == projectId);
+
+        if (result.DeletedCount == 0)
+        {
+            throw new AppValidationException("Project not found.");
+        }
+
+        await _boards.DeleteManyAsync(b => b.ProjectId == projectId);
+        await _tasks.DeleteManyAsync(t => t.ProjectId == projectId);
+        await _members.DeleteManyAsync(m => m.ProjectId == projectId);
     }
 }

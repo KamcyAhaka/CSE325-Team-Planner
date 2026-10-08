@@ -53,6 +53,11 @@ public class ProjectMemberService
                 nameof(memberId));
         }
 
-        await _members.DeleteOneAsync(m => m.Id == memberId);
+        var result = await _members.DeleteOneAsync(m => m.Id == memberId);
+
+        if (result.DeletedCount == 0)
+        {
+            throw new AppValidationException("Member not found.");
+        }
     }
 }
