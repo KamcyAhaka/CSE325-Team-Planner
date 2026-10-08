@@ -20,17 +20,17 @@
     <ValidationSummary class="form-validation" />
 
     <div class="form-field">
-        <InputText id="name" class="form-input" @bind-Value="user.DisplayName" placeholder="Full Name" autocomplete="name" />
+        <LiveInputText id="name" class="form-input" @bind-Value="user.DisplayName" placeholder="Full Name" autocomplete="name" />
         <ValidationMessage For="() => user.DisplayName" />
     </div>
 
     <div class="form-field">
-        <InputText id="email" type="email" class="form-input" @bind-Value="user.Email" placeholder="Email" autocomplete="email" />
+        <LiveInputText id="email" type="email" class="form-input" @bind-Value="user.Email" placeholder="Email" autocomplete="email" />
         <ValidationMessage For="() => user.Email" />
     </div>
 
     <div class="form-field">
-        <InputText id="password" type="password" class="form-input" @bind-Value="user.Password" placeholder="Password" autocomplete="new-password" />
+        <LiveInputText id="password" type="password" class="form-input" @bind-Value="user.Password" placeholder="Password" autocomplete="new-password" />
         <ValidationMessage For="() => user.Password" />
         <p class="password-hint">
             Password must be at least 8 characters, contain one uppercase letter, one lowercase letter, and one number.

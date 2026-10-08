@@ -301,6 +301,11 @@
     mask-image: url("icons/arrow-right.svg");
 }
 
+.icon-arrow-left {
+    -webkit-mask-image: url("icons/arrow-left.svg");
+    mask-image: url("icons/arrow-left.svg");
+}
+
 /* Icon size variants */
 .icon-xs {
     width: 12px;

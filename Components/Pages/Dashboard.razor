@@ -178,7 +178,7 @@
         int hour = now.Hour;
         Greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
-        var projects = await ProjectService.GetProjectsAsync();
+        var projects = await ProjectService.GetProjectsForUserAsync(_userId);
         var today = DateTime.Today;
 
         foreach (var project in projects)

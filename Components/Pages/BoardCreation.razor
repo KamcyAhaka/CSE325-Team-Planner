@@ -5,9 +5,12 @@
 
 @attribute [Authorize]
 
+@using System.Security.Claims
+
 @inject BoardService BoardService
 @inject ProjectService ProjectService
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UiActionRunner Runner
 
 <PageTitle>Create Board</PageTitle>
@@ -56,9 +59,9 @@ Create a board for one of your projects." />
                         Board Name
                     </label>
 
-                    <InputText id="boardName"
-                               class="form-input"
-                               @bind-Value="board.Name" />
+                    <LiveInputText id="boardName"
+                                   class="form-input"
+                                   @bind-Value="board.Name" />
                     <ValidationMessage For="() => board.Name" />
                 </div>
 
@@ -67,9 +70,9 @@ Create a board for one of your projects." />
                         Description
                     </label>
 
-                    <InputTextArea id="boardDescription"
-                                   class="form-input form-textarea"
-                                   @bind-Value="board.Description" />
+                    <LiveInputTextArea id="boardDescription"
+                                       class="form-input form-textarea"
+                                       @bind-Value="board.Description" />
                     <ValidationMessage For="() => board.Description" />
                 </div>
 
@@ -86,13 +89,28 @@ Create a board for one of your projects." />
 <ToastHost />
 
 @code {
+    [SupplyParameterFromQuery]
+    public string? projectId { get; set; }
+
     private List<Project> projects = new();
     private Board board = new();
     private bool saving;
 
     protected override async Task OnInitializedAsync()
     {
-        projects = await ProjectService.GetProjectsAsync();
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? string.Empty;
+
+        projects = await ProjectService.GetProjectsForUserAsync(userId);
+
+        if (!string.IsNullOrEmpty(projectId)
+            && projects.Any(p => p.Id == projectId))
+        {
+            board.ProjectId = projectId;
+        }
     }
 
     private async Task CreateBoard()

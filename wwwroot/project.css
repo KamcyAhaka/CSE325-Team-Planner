@@ -3,6 +3,7 @@
    form-input, form-textarea, btn-submit, validation-message) live in app.css. */
 
 .project-page {
+    width: 100%;
     max-width: 1000px;
     margin: 0 auto;
     padding: 2rem 1rem;
@@ -71,6 +72,200 @@
     border-radius: 0.75rem;
 }
 
+/* Project workspace page */
+
+.project-workspace {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.workspace-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: var(--color-primary-hover);
+}
+
+.project-header-card {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.project-header-main {
+    min-width: 0;
+}
+
+.project-header-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.project-header-main h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-foreground);
+}
+
+.project-header-desc {
+    margin: 0;
+    color: var(--color-muted);
+    line-height: 1.5;
+}
+
+.project-header-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+    width: 320px;
+    min-width: 0;
+}
+
+.project-members-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.project-members-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-muted);
+}
+
+.project-members {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: 320px;
+    min-width: 0;
+}
+
+.member-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.member-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.member-role {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+}
+
+.member-remove-btn {
+    margin-left: auto;
+}
+
+.add-member-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.2s ease;
+}
+
+.add-member-wrap.open {
+    grid-template-rows: 1fr;
+}
+
+.add-member-form {
+    overflow: hidden;
+    min-height: 0;
+}
+
+.add-member-wrap.open .add-member-form {
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.member-suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 0.5rem;
+    height: 92px;
+    overflow-y: auto;
+}
+
+.member-suggestion-empty {
+    margin: 0;
+}
+
+.member-suggestion {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
+    border: none;
+    border-radius: 0.375rem;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+}
+
+.member-suggestion:hover {
+    background: var(--color-hover);
+}
+
+.member-suggestion:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.workspace-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 1.5rem;
+}
+
+.task-board-section {
+    margin-top: 2rem;
+}
+
+@media (max-width: 900px) {
+    .project-header-card {
+        flex-direction: column;
+    }
+
+    .project-header-side {
+        width: 100%;
+        align-items: flex-start;
+    }
+}
+
 @media (max-width: 640px) {
     .project-page {
         padding: 1.5rem 1rem;
@@ -78,6 +273,14 @@
 
     .project-date-row,
     .project-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .project-workspace {
+        padding: 1.5rem 1rem;
+    }
+
+    .workspace-stats {
         grid-template-columns: 1fr;
     }
 }
