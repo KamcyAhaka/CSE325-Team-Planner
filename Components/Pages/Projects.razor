@@ -88,27 +88,130 @@ Create and manage your projects." />
 
                 @foreach (var item in projects)
                 {
-                    <div class="project-list-card">
+                    if (editingId == item.Id)
+                    {
+                        <div class="project-list-card">
 
-                        <h3 class="project-list-card-title">
-                            @item.Name
-                        </h3>
+                            <h3 class="project-list-card-title">Edit Project</h3>
 
-                        <p class="project-list-card-description">
-                            @item.Description
-                        </p>
+                            <EditForm Model="@editProject" OnValidSubmit="@UpdateProject" FormName="edit-project">
 
-                        <p class="project-list-card-date">
-                            <strong>Start:</strong>
-                            @item.StartDate.ToString("M/d/yyyy")
-                        </p>
+                                <DataAnnotationsValidator />
 
-                        <p class="project-list-card-date">
-                            <strong>End:</strong>
-                            @item.EndDate.ToString("M/d/yyyy")
-                        </p>
+                                <ValidationSummary class="form-validation" />
 
-                    </div>
+                                <div class="form-field">
+                                    <label for="editName" class="form-label">Project Name</label>
+                                    <LiveInputText id="editName" class="form-input" @bind-Value="editProject.Name" />
+                                    <ValidationMessage For="() => editProject.Name" />
+                                </div>
+
+                                <div class="form-field">
+                                    <label for="editDescription" class="form-label">Description</label>
+                                    <LiveInputTextArea id="editDescription" class="form-input form-textarea"
+                                                       @bind-Value="editProject.Description" />
+                                    <ValidationMessage For="() => editProject.Description" />
+                                </div>
+
+                                <div class="project-date-row">
+
+                                    <div class="form-field">
+                                        <label for="editStartDate" class="form-label">Start Date</label>
+                                        <InputDate id="editStartDate" class="form-input" @bind-Value="editProject.StartDate" />
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label for="editEndDate" class="form-label">End Date</label>
+                                        <InputDate id="editEndDate" class="form-input" @bind-Value="editProject.EndDate" />
+                                        <ValidationMessage For="() => editProject.EndDate" />
+                                    </div>
+
+                                </div>
+
+                                <div class="card-actions">
+                                    <SubmitButton Text="Save Changes"
+                                                  Class="btn btn-primary card-action-btn"
+                                                  IsBusy="@saving" />
+                                    <button type="button"
+                                            class="btn btn-outline-secondary card-action-btn"
+                                            disabled="@saving"
+                                            @onclick="CancelEdit">
+                                        Cancel
+                                    </button>
+                                </div>
+
+                            </EditForm>
+
+                        </div>
+                    }
+                    else if (deletingId == item.Id)
+                    {
+                        <div class="project-list-card">
+
+                            <h3 class="project-list-card-title">@item.Name</h3>
+
+                            <p class="project-list-card-description">
+                                Delete this project? Its boards and tasks will be deleted too.
+                            </p>
+
+                            <div class="card-confirm">
+                                <button type="button"
+                                        class="btn btn-danger card-action-btn"
+                                        disabled="@deleting"
+                                        @onclick="DeleteProject">
+                                    @(deleting ? "Deleting..." : "Yes, delete")
+                                </button>
+                                <button type="button"
+                                        class="btn btn-outline-secondary card-action-btn"
+                                        disabled="@deleting"
+                                        @onclick="CancelDelete">
+                                    No
+                                </button>
+                            </div>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="project-list-card">
+
+                            <h3 class="project-list-card-title">
+                                @item.Name
+                            </h3>
+
+                            <p class="project-list-card-description">
+                                @item.Description
+                            </p>
+
+                            <p class="project-list-card-date">
+                                <strong>Start:</strong>
+                                @item.StartDate.ToString("M/d/yyyy")
+                            </p>
+
+                            <p class="project-list-card-date">
+                                <strong>End:</strong>
+                                @item.EndDate.ToString("M/d/yyyy")
+                            </p>
+
+                            <div class="card-actions">
+                                <a class="btn btn-primary card-action-btn"
+                                   href="/projects/@item.Id">
+                                    Open
+                                </a>
+                                <button type="button"
+                                        class="btn btn-outline-secondary card-action-btn"
+                                        @onclick="() => StartEdit(item)">
+                                    Edit
+                                </button>
+                                <button type="button"
+                                        class="btn btn-danger card-action-btn"
+                                        @onclick="() => StartDelete(item)">
+                                    Delete
+                                </button>
+                            </div>
+
+                        </div>
+                    }
                 }
 
             </div>
@@ -131,15 +234,15 @@ Create and manage your projects." />
     private List<Project> projects = new();
     private bool saving;
 
+    private string? editingId;
+    private Project editProject = new();
+
+    private string? deletingId;
+    private bool deleting;
+
     protected override async Task OnInitializedAsync()
     {
-        var authenticationState = await AuthenticationStateProvider
-            .GetAuthenticationStateAsync();
-
-        var userId = authenticationState.User
-            .FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-
-        projects = await ProjectService.GetProjectsForUserAsync(userId);
+        await ReloadProjects();
     }
 
     private async Task CreateProject()
@@ -160,14 +263,106 @@ Create and manage your projects." />
 
             if (created)
             {
-                var ownerId = project.OwnerId;
                 project = new Project { StartDate = DateTime.Today, EndDate = DateTime.Today.AddMonths(1) };
-                projects = await ProjectService.GetProjectsForUserAsync(ownerId);
+                await ReloadProjects();
             }
         }
         finally
         {
             saving = false;
         }
+    }
+
+    private void StartEdit(Project item)
+    {
+        editingId = item.Id;
+        editProject = new Project
+        {
+            Id = item.Id,
+            Name = item.Name,
+            Description = item.Description ?? string.Empty,
+            StartDate = item.StartDate,
+            EndDate = item.EndDate
+        };
+    }
+
+    private void CancelEdit()
+    {
+        editingId = null;
+    }
+
+    private async Task UpdateProject()
+    {
+        if (editingId is null || saving)
+        {
+            return;
+        }
+
+        saving = true;
+
+        try
+        {
+            var updated = await Runner.RunAsync(
+                () => ProjectService.UpdateProjectAsync(editProject),
+                "Project updated successfully!");
+
+            if (updated)
+            {
+                editingId = null;
+                await ReloadProjects();
+            }
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private void StartDelete(Project item)
+    {
+        deletingId = item.Id;
+    }
+
+    private void CancelDelete()
+    {
+        deletingId = null;
+    }
+
+    private async Task DeleteProject()
+    {
+        if (deletingId is null || deleting)
+        {
+            return;
+        }
+
+        deleting = true;
+
+        try
+        {
+            var deleted = await Runner.RunAsync(
+                () => ProjectService.DeleteProjectAsync(deletingId),
+                "Project deleted successfully!");
+
+            if (deleted)
+            {
+                deletingId = null;
+                await ReloadProjects();
+            }
+        }
+        finally
+        {
+            deleting = false;
+        }
+    }
+
+    private async Task ReloadProjects()
+    {
+        var authenticationState = await AuthenticationStateProvider
+            .GetAuthenticationStateAsync();
+
+        var userId = authenticationState.User
+            .FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+
+        projects = await ProjectService.GetProjectsForUserAsync(userId);
     }
 }
