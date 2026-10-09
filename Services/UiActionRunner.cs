@@ -6,6 +6,7 @@ public class UiActionRunner
     private readonly ToastService _toasts;
     private readonly ILogger<UiActionRunner> _logger;
 
+    /// <summary>Creates the runner using the given toast service and logger.</summary>
     public UiActionRunner(ToastService toasts, ILogger<UiActionRunner> logger)
     {
         _toasts = toasts;
@@ -54,6 +55,7 @@ public class UiActionRunner
         }
     }
 
+    /// <summary>Logs the failure at an appropriate level and shows a user-friendly toast.</summary>
     private void Report(Exception exception)
     {
         if (exception is AppValidationException)
