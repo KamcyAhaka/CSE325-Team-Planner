@@ -1,3 +1,4 @@
+/* Scoped styles for the toast notification stack (top-right, auto-dismiss). */
 .toast-stack {
     position: fixed;
     top: 1rem;
