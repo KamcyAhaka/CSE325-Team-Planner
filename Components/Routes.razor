@@ -1,4 +1,5 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
+@* Sets up the Blazor router; EmptyLayout is the default so pages opt in to a layout explicitly. *@
+<Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.EmptyLayout)" />
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
