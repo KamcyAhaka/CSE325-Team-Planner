@@ -8,6 +8,10 @@
 
 @using System.Security.Claims
 
+@* Project workspace page: shows the project overview, its boards and tasks,
+   completion progress, and lets the owner manage the team (invite members by
+   email search, remove members). *@
+
 @inject ProjectService ProjectService
 @inject BoardService BoardService
 @inject TaskService TaskService
@@ -70,10 +74,8 @@
 
                     @if (userId == project.OwnerId)
                     {
-                        <button type="button"
-                                class="btn btn-outline-secondary card-action-btn"
-                                disabled="@(removingMemberBusy || addingMemberBusy)"
-                                @onclick="ToggleAddMember">
+                        <button type="button" class="btn btn-outline-secondary card-action-btn"
+                                disabled="@(removingMemberBusy || addingMemberBusy)" @onclick="ToggleAddMember">
                             @(showAddMember ? "Close" : "Add Member")
                         </button>
                     }
@@ -93,16 +95,12 @@
                                 <span class="member-name">@name</span>
                                 <span>Remove from this project?</span>
 
-                                <button type="button"
-                                        class="btn btn-danger card-action-btn"
-                                        disabled="@removingMemberBusy"
+                                <button type="button" class="btn btn-danger card-action-btn" disabled="@removingMemberBusy"
                                         @onclick="RemoveMember">
                                     @(removingMemberBusy ? "Removing..." : "Yes, remove")
                                 </button>
-                                <button type="button"
-                                        class="btn btn-outline-secondary card-action-btn"
-                                        disabled="@removingMemberBusy"
-                                        @onclick="CancelRemoveMember">
+                                <button type="button" class="btn btn-outline-secondary card-action-btn"
+                                        disabled="@removingMemberBusy" @onclick="CancelRemoveMember">
                                     No
                                 </button>
                             </div>
@@ -118,10 +116,8 @@
 
                                 @if (userId == project.OwnerId && person.MemberId is not null)
                                 {
-                                    <button type="button"
-                                            class="btn btn-danger card-action-btn member-remove-btn"
-                                            disabled="@removingMemberBusy"
-                                            title="Remove @name from this project"
+                                    <button type="button" class="btn btn-danger card-action-btn member-remove-btn"
+                                            disabled="@removingMemberBusy" title="Remove @name from this project"
                                             @onclick="() => StartRemoveMember(person)">
                                         Remove
                                     </button>
@@ -134,22 +130,15 @@
                         <div class="add-member-form">
                             <div class="form-field">
                                 <label for="memberSearch" class="form-label">Search by name or email</label>
-                                <input id="memberSearch"
-                                       type="text"
-                                       class="form-input"
-                                       placeholder="Type to search..."
-                                       value="@addMemberQuery"
-                                       disabled="@addingMemberBusy"
-                                       @oninput="OnMemberSearchInput" />
+                                <input id="memberSearch" type="text" class="form-input" placeholder="Type to search..."
+                                       value="@addMemberQuery" disabled="@addingMemberBusy" @oninput="OnMemberSearchInput" />
 
                                 <div class="member-suggestions">
                                     @if (userSuggestions.Count > 0)
                                     {
                                         @foreach (var user in userSuggestions)
                                         {
-                                            <button type="button"
-                                                    class="member-suggestion"
-                                                    disabled="@addingMemberBusy"
+                                            <button type="button" class="member-suggestion" disabled="@addingMemberBusy"
                                                     @onclick="() => SelectSuggestedUser(user)">
                                                 <span class="avatar avatar-sm">
                                                     @UserInfo.GetInitials(user.DisplayName)
@@ -161,178 +150,168 @@
                                     }
                                     else if (addMemberQuery.Trim().Length >= 2 && !addingMemberBusy)
                                     {
-                                        <p class="form-hint member-suggestion-empty">No users found. Select a suggestion above to enable Add.</p>
-                                    }
+                                        <p class="form-hint member-suggestion-empty">No users found. Select a suggestion above
+                                            to enable Add.</p>
+                                        }
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="card-actions">
-                                <button type="button"
-                                        class="btn btn-primary card-action-btn"
-                                        disabled="@(selectedUser is null || addingMemberBusy)"
-                                        @onclick="AddMember">
-                                    @(addingMemberBusy ? "Adding..." : "Add")
-                                </button>
-                            </div>
+                                <div class="card-actions">
+                                    <button type="button" class="btn btn-primary card-action-btn"
+                                            disabled="@(selectedUser is null || addingMemberBusy)" @onclick="AddMember">
+                                        @(addingMemberBusy ? "Adding..." : "Add")
+                                    </button>
+                                </div>
 
-                            @if (!string.IsNullOrEmpty(addMemberError))
-                            {
-                                <p class="form-validation">@addMemberError</p>
-                            }
+                                @if (!string.IsNullOrEmpty(addMemberError))
+                                {
+                                    <p class="form-validation">@addMemberError</p>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="workspace-stats">
-            <div class="stat-card">
-                <div class="stat-icon stat-icon-primary">
-                    <span class="icon icon-square-check"></span>
+            <div class="workspace-stats">
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-primary">
+                        <span class="icon icon-square-check"></span>
+                    </div>
+
+                    <div class="stat-info">
+                        <span class="stat-label">Project Progress</span>
+                        <span class="stat-value">@ProgressPercent% Complete</span>
+                    </div>
                 </div>
 
-                <div class="stat-info">
-                    <span class="stat-label">Project Progress</span>
-                    <span class="stat-value">@ProgressPercent% Complete</span>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-blue">
+                        <span class="icon icon-folder"></span>
+                    </div>
+
+                    <div class="stat-info">
+                        <span class="stat-label">Total Tasks</span>
+                        <span class="stat-value">@tasks.Count Active: @ActiveCount</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-icon stat-icon-blue">
-                    <span class="icon icon-folder"></span>
+            <section class="task-board-section">
+                <div class="section-header">
+                    <h3 class="section-title">Task Boards</h3>
                 </div>
 
-                <div class="stat-info">
-                    <span class="stat-label">Total Tasks</span>
-                    <span class="stat-value">@tasks.Count Active: @ActiveCount</span>
-                </div>
-            </div>
-        </div>
-
-        <section class="task-board-section">
-            <div class="section-header">
-                <h3 class="section-title">Task Boards</h3>
-            </div>
-
-            @if (boards.Count == 0)
-            {
-                <div class="empty-state task-empty">
-                    <span class="empty-icon icon-folder"></span>
-                    <p>No boards yet. Create your first board to start organizing tasks.</p>
-                </div>
-            }
-            else
-            {
-                <div class="projects-grid">
-                    @foreach (var board in boards)
-                    {
-                        var boardTasks = tasks.Where(t => t.BoardId == board.Id).ToList();
-
-                        if (editingBoardId == board.Id)
+                @if (boards.Count == 0)
+                {
+                    <div class="empty-state task-empty">
+                        <span class="empty-icon icon-folder"></span>
+                        <p>No boards yet. Create your first board to start organizing tasks.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="projects-grid">
+                        @foreach (var board in boards)
                         {
-                            <article class="project-card">
-                                <h3 class="project-name">Edit Board</h3>
+                            var boardTasks = tasks.Where(t => t.BoardId == board.Id).ToList();
 
-                                <EditForm Model="@editBoard" OnValidSubmit="@UpdateBoard" FormName="edit-board">
+                            if (editingBoardId == board.Id)
+                            {
+                                <article class="project-card">
+                                    <h3 class="project-name">Edit Board</h3>
 
-                                    <DataAnnotationsValidator />
+                                    <EditForm Model="@editBoard" OnValidSubmit="@UpdateBoard" FormName="edit-board">
 
-                                    <ValidationSummary class="form-validation" />
+                                        <DataAnnotationsValidator />
 
-                                    <div class="form-field">
-                                        <label for="editBoardName" class="form-label">Board Name</label>
-                                        <LiveInputText id="editBoardName" class="form-input" @bind-Value="editBoard.Name" />
-                                        <ValidationMessage For="() => editBoard.Name" />
-                                    </div>
+                                        <ValidationSummary class="form-validation" />
 
-                                    <div class="form-field">
-                                        <label for="editBoardDescription" class="form-label">Description</label>
-                                        <LiveInputTextArea id="editBoardDescription" class="form-input form-textarea"
-                                                           @bind-Value="editBoard.Description" />
-                                        <ValidationMessage For="() => editBoard.Description" />
-                                    </div>
+                                        <div class="form-field">
+                                            <label for="editBoardName" class="form-label">Board Name</label>
+                                            <LiveInputText id="editBoardName" class="form-input" @bind-Value="editBoard.Name" />
+                                            <ValidationMessage For="() => editBoard.Name" />
+                                        </div>
 
-                                    <div class="card-actions">
-                                        <SubmitButton Text="Save Changes"
-                                                      Class="btn btn-primary card-action-btn"
-                                                      IsBusy="@savingBoard" />
-                                        <button type="button"
-                                                class="btn btn-outline-secondary card-action-btn"
-                                                disabled="@savingBoard"
-                                                @onclick="CancelEditBoard">
-                                            Cancel
+                                        <div class="form-field">
+                                            <label for="editBoardDescription" class="form-label">Description</label>
+                                            <LiveInputTextArea id="editBoardDescription" class="form-input form-textarea"
+                                                               @bind-Value="editBoard.Description" />
+                                            <ValidationMessage For="() => editBoard.Description" />
+                                        </div>
+
+                                        <div class="card-actions">
+                                            <SubmitButton Text="Save Changes" Class="btn btn-primary card-action-btn"
+                                                          IsBusy="@savingBoard" />
+                                            <button type="button" class="btn btn-outline-secondary card-action-btn" disabled="@savingBoard"
+                                                    @onclick="CancelEditBoard">
+                                                Cancel
+                                            </button>
+                                        </div>
+
+                                    </EditForm>
+                                </article>
+                            }
+                            else if (deletingBoardId == board.Id)
+                            {
+                                <article class="project-card">
+                                    <h3 class="project-name">@board.Name</h3>
+
+                                    <p class="project-desc">
+                                        Delete this board? Its tasks will be deleted too.
+                                    </p>
+
+                                    <div class="card-confirm">
+                                        <button type="button" class="btn btn-danger card-action-btn" disabled="@deletingBoard"
+                                                @onclick="DeleteBoard">
+                                            @(deletingBoard ? "Deleting..." : "Yes, delete")
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary card-action-btn" disabled="@deletingBoard"
+                                                @onclick="CancelDeleteBoard">
+                                            No
                                         </button>
                                     </div>
+                                </article>
+                            }
+                            else
+                            {
+                                <article class="project-card">
+                                    <div class="project-card-top">
+                                        <span class="project-badge">@boardTasks.Count</span>
+                                        <span class="project-date">tasks</span>
+                                    </div>
 
-                                </EditForm>
-                            </article>
+                                    <h3 class="project-name">@board.Name</h3>
+
+                                    @if (!string.IsNullOrEmpty(board.Description))
+                                    {
+                                        <p class="project-desc">@board.Description</p>
+                                    }
+
+                                    <div class="card-actions">
+                                        <a href="/boards/@board.Id" class="btn btn-primary card-action-btn">
+                                            Open Board
+                                        </a>
+                                        <button type="button" class="btn btn-outline-secondary card-action-btn"
+                                                @onclick="() => StartEditBoard(board)">
+                                            Edit
+                                        </button>
+                                        <button type="button" class="btn btn-danger card-action-btn"
+                                                @onclick="() => StartDeleteBoard(board)">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </article>
+                            }
                         }
-                        else if (deletingBoardId == board.Id)
-                        {
-                            <article class="project-card">
-                                <h3 class="project-name">@board.Name</h3>
+                    </div>
+                }
 
-                                <p class="project-desc">
-                                    Delete this board? Its tasks will be deleted too.
-                                </p>
+            </section>
+        }
 
-                                <div class="card-confirm">
-                                    <button type="button"
-                                            class="btn btn-danger card-action-btn"
-                                            disabled="@deletingBoard"
-                                            @onclick="DeleteBoard">
-                                        @(deletingBoard ? "Deleting..." : "Yes, delete")
-                                    </button>
-                                    <button type="button"
-                                            class="btn btn-outline-secondary card-action-btn"
-                                            disabled="@deletingBoard"
-                                            @onclick="CancelDeleteBoard">
-                                        No
-                                    </button>
-                                </div>
-                            </article>
-                        }
-                        else
-                        {
-                            <article class="project-card">
-                                <div class="project-card-top">
-                                    <span class="project-badge">@boardTasks.Count</span>
-                                    <span class="project-date">tasks</span>
-                                </div>
-
-                                <h3 class="project-name">@board.Name</h3>
-
-                                @if (!string.IsNullOrEmpty(board.Description))
-                                {
-                                    <p class="project-desc">@board.Description</p>
-                                }
-
-                                <div class="card-actions">
-                                    <a href="/boards/@board.Id" class="btn btn-primary card-action-btn">
-                                        Open Board
-                                    </a>
-                                    <button type="button"
-                                            class="btn btn-outline-secondary card-action-btn"
-                                            @onclick="() => StartEditBoard(board)">
-                                        Edit
-                                    </button>
-                                    <button type="button"
-                                            class="btn btn-danger card-action-btn"
-                                            @onclick="() => StartDeleteBoard(board)">
-                                        Delete
-                                    </button>
-                                </div>
-                            </article>
-                        }
-                    }
-                </div>
-            }
-
-        </section>
-    }
-
-    <ToastHost />
-</div>
+        <ToastHost />
+    </div>
 
 @code {
     [Parameter]
@@ -372,6 +351,10 @@
 
         var members = await ProjectMemberService.GetMembersByProjectAsync(projectId);
 
+        // The owner is always listed first with a null MemberId: the owner is not
+        // stored as a ProjectMember document, so there is no membership row to
+        // remove. Invited members are added afterwards, skipping the owner in
+        // case a membership row for them exists.
         team = new List<TeamPerson> { new(project.OwnerId, null, "Owner") };
 
         foreach (var member in members)
@@ -500,6 +483,7 @@
     private bool addingMemberBusy;
     private CancellationTokenSource? searchCts;
 
+    /// <summary>Opens the remove confirmation for a member; the owner row has no MemberId and cannot be removed.</summary>
     private void StartRemoveMember(TeamPerson person)
     {
         if (person.MemberId is null || removingMemberBusy)
@@ -584,6 +568,7 @@
         addMemberError = null;
     }
 
+    /// <summary>Debounced member search: waits 300 ms after the last keystroke before querying.</summary>
     private async Task OnMemberSearchInput(ChangeEventArgs e)
     {
         addMemberQuery = e.Value?.ToString() ?? string.Empty;
@@ -616,6 +601,7 @@
 
         var results = await UserService.SearchUsersAsync(addMemberQuery);
 
+        // Users already on the team are excluded from the suggestions.
         var teamIds = team.Select(p => p.UserId).ToHashSet();
         userSuggestions = results.Where(u => !teamIds.Contains(u.Id)).ToList();
 
@@ -635,6 +621,7 @@
         addMemberError = null;
     }
 
+    /// <summary>Adds the selected user to the project; invited members always get the Member role.</summary>
     private async Task AddMember()
     {
         if (project is null || selectedUser is null || addingMemberBusy)
@@ -704,6 +691,7 @@
         _ => "Member",
     };
 
+    /// <summary>A row in the team list; MemberId is null for the owner, who has no membership document.</summary>
     private sealed record TeamPerson(
         string UserId,
         string? MemberId,
