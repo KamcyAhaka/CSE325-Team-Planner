@@ -1,3 +1,6 @@
+@* Project workspace page: shows the project overview, its boards and tasks,
+   completion progress, and lets the owner manage the team (invite members by
+   email search, remove members). *@
 @page "/projects/{projectId}"
 
 @layout DashboardLayout
@@ -7,10 +10,6 @@
 @attribute [Authorize]
 
 @using System.Security.Claims
-
-@* Project workspace page: shows the project overview, its boards and tasks,
-   completion progress, and lets the owner manage the team (invite members by
-   email search, remove members). *@
 
 @inject ProjectService ProjectService
 @inject BoardService BoardService
