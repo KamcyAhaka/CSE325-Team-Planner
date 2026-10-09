@@ -23,8 +23,10 @@ public class ToastService
     private readonly List<ToastMessage> _toasts = new();
     private readonly object _lock = new();
 
+    /// <summary>Raised whenever the toast list changes so subscribed components can re-render.</summary>
     public event Action? Changed;
 
+    /// <summary>Returns a snapshot of the currently visible toasts, oldest first.</summary>
     public IReadOnlyList<ToastMessage> Toasts
     {
         get
@@ -36,14 +38,19 @@ public class ToastService
         }
     }
 
+    /// <summary>Shows a success toast.</summary>
     public void Success(string message) => Show(ToastLevel.Success, message);
 
+    /// <summary>Shows an informational toast.</summary>
     public void Info(string message) => Show(ToastLevel.Info, message);
 
+    /// <summary>Shows a warning toast.</summary>
     public void Warning(string message) => Show(ToastLevel.Warning, message);
 
+    /// <summary>Shows an error toast, which stays visible longer than the other levels.</summary>
     public void Error(string message) => Show(ToastLevel.Error, message);
 
+    /// <summary>Adds a toast at the given level and raises <see cref="Changed"/>.</summary>
     public void Show(ToastLevel level, string message, TimeSpan? duration = null)
     {
         if (string.IsNullOrWhiteSpace(message))
@@ -61,6 +68,8 @@ public class ToastService
         {
             _toasts.Add(toast);
 
+            // Keep at most MaxVisible toasts so a burst of actions cannot flood the screen;
+            // the oldest one is dropped first.
             if (_toasts.Count > MaxVisible)
             {
                 _toasts.RemoveAt(0);
@@ -70,6 +79,7 @@ public class ToastService
         Changed?.Invoke();
     }
 
+    /// <summary>Removes the toast with the given id and raises <see cref="Changed"/> if it existed.</summary>
     public void Dismiss(Guid id)
     {
         bool removed;

@@ -8,11 +8,13 @@ public class TaskService
 {
     private readonly IMongoCollection<ProjectTask> _tasks;
 
+    /// <summary>Initializes the service with the MongoDB tasks collection.</summary>
     public TaskService(IMongoDatabase database)
     {
         _tasks = database.GetCollection<ProjectTask>("Tasks");
     }
 
+    /// <summary>Creates a new task and stamps it with the creation timestamp.</summary>
     public async Task CreateTaskAsync(ProjectTask task)
     {
         EntityValidator.EnsureValid(task);
@@ -22,6 +24,7 @@ public class TaskService
         await _tasks.InsertOneAsync(task);
     }
 
+    /// <summary>Returns all tasks belonging to the given project, across every board.</summary>
     public async Task<List<ProjectTask>> GetTasksByProjectAsync(string projectId)
     {
         if (string.IsNullOrWhiteSpace(projectId))
@@ -36,6 +39,7 @@ public class TaskService
         return await _tasks.Find(filter).ToListAsync();
     }
 
+    /// <summary>Returns all tasks on the given board, used to render the board columns.</summary>
     public async Task<List<ProjectTask>> GetTasksByBoardAsync(string boardId)
     {
         if (string.IsNullOrWhiteSpace(boardId))
@@ -50,6 +54,7 @@ public class TaskService
         return await _tasks.Find(filter).ToListAsync();
     }
 
+    /// <summary>Returns the task with the given id, or null if it does not exist.</summary>
     public async Task<ProjectTask?> GetTaskByIdAsync(string taskId)
     {
         if (string.IsNullOrWhiteSpace(taskId))
@@ -64,6 +69,7 @@ public class TaskService
             .FirstOrDefaultAsync();
     }
 
+    /// <summary>Updates the editable fields of an existing task.</summary>
     public async Task UpdateTaskAsync(ProjectTask task)
     {
         EntityValidator.EnsureValid(task);
@@ -85,6 +91,7 @@ public class TaskService
         }
     }
 
+    /// <summary>Changes only the status of a task, leaving all other fields untouched.</summary>
     public async Task UpdateTaskStatusAsync(string taskId, ProjectTaskStatus status)
     {
         if (string.IsNullOrWhiteSpace(taskId))
@@ -105,6 +112,7 @@ public class TaskService
         }
     }
 
+    /// <summary>Deletes the task with the given id.</summary>
     public async Task DeleteTaskAsync(string taskId)
     {
         if (string.IsNullOrWhiteSpace(taskId))

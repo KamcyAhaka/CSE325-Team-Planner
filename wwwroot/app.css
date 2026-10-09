@@ -1,3 +1,8 @@
+/* ==========================================================================
+   Global App Styles — design tokens, shared form components, buttons,
+   card actions and status pages (404 / error). Page-specific styles live
+   in their own CSS files (home.css, auth.css, dashboard.css, ...).
+   ========================================================================== */
 :root {
     --color-bg: #f8fafc;
     --color-card: #ffffff;

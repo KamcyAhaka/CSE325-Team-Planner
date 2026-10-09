@@ -10,6 +10,7 @@ public class AuthService
     private readonly UserService _userService;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
+    /// <summary>Creates the service using the given user store and HTTP context accessor.</summary>
     public AuthService(
         UserService userService,
         IHttpContextAccessor httpContextAccessor)
@@ -18,6 +19,7 @@ public class AuthService
         _httpContextAccessor = httpContextAccessor;
     }
 
+    /// <summary>Validates the credentials and signs the user in with a persistent cookie.</summary>
     public async Task<(bool Success, string? Error)> LoginAsync(string email, string password)
     {
         if (string.IsNullOrWhiteSpace(email))
@@ -52,6 +54,7 @@ public class AuthService
         await _httpContextAccessor.HttpContext!.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(identity),
+            // The cookie is persistent and lives for 7 days before the user must log in again.
             new AuthenticationProperties
             {
                 IsPersistent = true,
@@ -61,6 +64,7 @@ public class AuthService
         return (true, null);
     }
 
+    /// <summary>Signs the current user out by clearing the authentication cookie.</summary>
     public async Task LogoutAsync()
     {
         await _httpContextAccessor.HttpContext!.SignOutAsync(
