@@ -6,6 +6,10 @@
 
 @attribute [Authorize]
 
+@* Kanban board page: shows the project's tasks in three columns (To Do / In
+   Progress / Done) and lets the user create, edit, move and delete tasks, as
+   well as rename or delete the board itself. *@
+
 @using System.Security.Claims
 
 @inject BoardService BoardService
@@ -47,10 +51,7 @@
             <div class="board-header">
                 <h1>Edit Board</h1>
 
-                <EditForm Model="@editBoard"
-                          OnValidSubmit="@UpdateBoard"
-                          FormName="edit-board"
-                          Class="form-card">
+                <EditForm Model="@editBoard" OnValidSubmit="@UpdateBoard" FormName="edit-board" Class="form-card">
 
                     <DataAnnotationsValidator />
 
@@ -58,27 +59,20 @@
 
                     <div class="form-field">
                         <label for="editBoardName" class="form-label">Board Name</label>
-                        <LiveInputText id="editBoardName"
-                                       class="form-input"
-                                       @bind-Value="editBoard.Name" />
+                        <LiveInputText id="editBoardName" class="form-input" @bind-Value="editBoard.Name" />
                         <ValidationMessage For="() => editBoard.Name" />
                     </div>
 
                     <div class="form-field">
                         <label for="editBoardDescription" class="form-label">Description</label>
-                        <LiveInputTextArea id="editBoardDescription"
-                                           class="form-input form-textarea"
+                        <LiveInputTextArea id="editBoardDescription" class="form-input form-textarea"
                                            @bind-Value="editBoard.Description" />
                         <ValidationMessage For="() => editBoard.Description" />
                     </div>
 
                     <div class="card-actions">
-                        <SubmitButton Text="Save Changes"
-                                      Class="btn btn-primary card-action-btn"
-                                      IsBusy="@savingBoard" />
-                        <button type="button"
-                                class="btn btn-outline-secondary card-action-btn"
-                                disabled="@savingBoard"
+                        <SubmitButton Text="Save Changes" Class="btn btn-primary card-action-btn" IsBusy="@savingBoard" />
+                        <button type="button" class="btn btn-outline-secondary card-action-btn" disabled="@savingBoard"
                                 @onclick="CancelEditBoard">
                             Cancel
                         </button>
@@ -95,15 +89,11 @@
                 <p>Delete this board? Its tasks will be deleted too.</p>
 
                 <div class="card-confirm">
-                    <button type="button"
-                            class="btn btn-danger card-action-btn"
-                            disabled="@deletingBoard"
+                    <button type="button" class="btn btn-danger card-action-btn" disabled="@deletingBoard"
                             @onclick="DeleteBoard">
                         @(deletingBoard ? "Deleting..." : "Yes, delete")
                     </button>
-                    <button type="button"
-                            class="btn btn-outline-secondary card-action-btn"
-                            disabled="@deletingBoard"
+                    <button type="button" class="btn btn-outline-secondary card-action-btn" disabled="@deletingBoard"
                             @onclick="CancelDeleteBoard">
                         No
                     </button>
@@ -121,24 +111,17 @@
                 }
 
                 <div class="card-actions">
-                    <button type="button"
-                            class="btn btn-outline-secondary card-action-btn"
-                            @onclick="StartEditBoard">
+                    <button type="button" class="btn btn-outline-secondary card-action-btn" @onclick="StartEditBoard">
                         Edit
                     </button>
-                    <button type="button"
-                            class="btn btn-danger card-action-btn"
-                            @onclick="StartDeleteBoard">
+                    <button type="button" class="btn btn-danger card-action-btn" @onclick="StartDeleteBoard">
                         Delete
                     </button>
                 </div>
             </div>
         }
 
-        <EditForm Model="@newTask"
-                  OnValidSubmit="@CreateTask"
-                  FormName="create-task"
-                  Class="form-card board-task-form">
+        <EditForm Model="@newTask" OnValidSubmit="@CreateTask" FormName="create-task" Class="form-card board-task-form">
 
             <DataAnnotationsValidator />
 
@@ -149,16 +132,13 @@
 
                 <div class="form-field">
                     <label for="taskTitle" class="form-label">Task Title</label>
-                    <LiveInputText id="taskTitle"
-                                   class="form-input"
-                                   @bind-Value="newTask.Title" />
+                    <LiveInputText id="taskTitle" class="form-input" @bind-Value="newTask.Title" />
                     <ValidationMessage For="() => newTask.Title" />
                 </div>
 
                 <div class="form-field">
                     <label for="taskDescription" class="form-label">Description</label>
-                    <LiveInputTextArea id="taskDescription"
-                                       class="form-input form-textarea"
+                    <LiveInputTextArea id="taskDescription" class="form-input form-textarea"
                                        @bind-Value="newTask.Description" />
                     <ValidationMessage For="() => newTask.Description" />
                 </div>
@@ -171,9 +151,7 @@
 
                     @if (hasDueDate)
                     {
-                        <InputDate id="taskDueDate"
-                                   class="form-input"
-                                   @bind-Value="dueDate" />
+                        <InputDate id="taskDueDate" class="form-input" @bind-Value="dueDate" />
                     }
                 </div>
 
@@ -204,9 +182,7 @@
                             <article class="board-task-card">
                                 <h3>Edit Task</h3>
 
-                                <EditForm Model="@editTask"
-                                          OnValidSubmit="@UpdateTask"
-                                          FormName="edit-task">
+                                <EditForm Model="@editTask" OnValidSubmit="@UpdateTask" FormName="edit-task">
 
                                     <DataAnnotationsValidator />
 
@@ -214,16 +190,13 @@
 
                                     <div class="form-field">
                                         <label for="editTaskTitle" class="form-label">Task Title</label>
-                                        <LiveInputText id="editTaskTitle"
-                                                       class="form-input"
-                                                       @bind-Value="editTask.Title" />
+                                        <LiveInputText id="editTaskTitle" class="form-input" @bind-Value="editTask.Title" />
                                         <ValidationMessage For="() => editTask.Title" />
                                     </div>
 
                                     <div class="form-field">
                                         <label for="editTaskDescription" class="form-label">Description</label>
-                                        <LiveInputTextArea id="editTaskDescription"
-                                                           class="form-input form-textarea"
+                                        <LiveInputTextArea id="editTaskDescription" class="form-input form-textarea"
                                                            @bind-Value="editTask.Description" />
                                         <ValidationMessage For="() => editTask.Description" />
                                     </div>
@@ -236,17 +209,13 @@
 
                                         @if (editHasDueDate)
                                         {
-                                            <InputDate id="editTaskDueDate"
-                                                       class="form-input"
-                                                       @bind-Value="editDueDate" />
+                                            <InputDate id="editTaskDueDate" class="form-input" @bind-Value="editDueDate" />
                                         }
                                     </div>
 
                                     <div class="form-field">
                                         <label for="editTaskStatus" class="form-label">Status</label>
-                                        <select id="editTaskStatus"
-                                                class="form-input"
-                                                @bind="editTask.Status">
+                                        <select id="editTaskStatus" class="form-input" @bind="editTask.Status">
                                             <option value="@ProjectTaskStatus.ToDo">To Do</option>
                                             <option value="@ProjectTaskStatus.InProgress">In Progress</option>
                                             <option value="@ProjectTaskStatus.Done">Done</option>
@@ -254,12 +223,8 @@
                                     </div>
 
                                     <div class="card-actions">
-                                        <SubmitButton Text="Save Changes"
-                                                      Class="btn btn-primary card-action-btn"
-                                                      IsBusy="@saving" />
-                                        <button type="button"
-                                                class="btn btn-outline-secondary card-action-btn"
-                                                disabled="@saving"
+                                        <SubmitButton Text="Save Changes" Class="btn btn-primary card-action-btn" IsBusy="@saving" />
+                                        <button type="button" class="btn btn-outline-secondary card-action-btn" disabled="@saving"
                                                 @onclick="CancelEditTask">
                                             Cancel
                                         </button>
@@ -276,15 +241,11 @@
                                 <p>Delete this task?</p>
 
                                 <div class="card-confirm">
-                                    <button type="button"
-                                            class="btn btn-danger card-action-btn"
-                                            disabled="@deletingTask"
+                                    <button type="button" class="btn btn-danger card-action-btn" disabled="@deletingTask"
                                             @onclick="DeleteTask">
                                         @(deletingTask ? "Deleting..." : "Yes, delete")
                                     </button>
-                                    <button type="button"
-                                            class="btn btn-outline-secondary card-action-btn"
-                                            disabled="@deletingTask"
+                                    <button type="button" class="btn btn-outline-secondary card-action-btn" disabled="@deletingTask"
                                             @onclick="CancelDeleteTask">
                                         No
                                     </button>
@@ -311,9 +272,7 @@
                                 <div class="board-task-actions">
                                     @foreach (var target in column.Moves)
                                     {
-                                        <button type="button"
-                                                class="btn btn-outline-secondary board-task-move-btn"
-                                                disabled="@saving"
+                                        <button type="button" class="btn btn-outline-secondary board-task-move-btn" disabled="@saving"
                                                 @onclick="() => UpdateTaskStatus(task.Id, target)">
                                             Move to @GetStatusLabel(target)
                                         </button>
@@ -321,14 +280,11 @@
                                 </div>
 
                                 <div class="board-task-actions">
-                                    <button type="button"
-                                            class="btn btn-outline-secondary card-action-btn"
+                                    <button type="button" class="btn btn-outline-secondary card-action-btn"
                                             @onclick="() => StartEditTask(task)">
                                         Edit
                                     </button>
-                                    <button type="button"
-                                            class="btn btn-danger card-action-btn"
-                                            @onclick="() => StartDeleteTask(task)">
+                                    <button type="button" class="btn btn-danger card-action-btn" @onclick="() => StartDeleteTask(task)">
                                         Delete
                                     </button>
                                 </div>
@@ -372,6 +328,8 @@
     private bool confirmingDeleteBoard;
     private bool deletingBoard;
 
+    // The three kanban columns. Each one lists the statuses its tasks can be moved to,
+    // which drives the move buttons rendered on every task card.
     private static readonly TaskColumn[] Columns =
     [
         new("To Do", ProjectTaskStatus.ToDo,
@@ -401,6 +359,7 @@
         var project = await ProjectService.GetProjectByIdAsync(board.ProjectId);
         var members = await ProjectMemberService.GetMembersByProjectAsync(board.ProjectId);
 
+        // Only the project owner or an invited member may open the board.
         noAccess = project is null
             || (project.OwnerId != userId && !members.Any(m => m.UserId == userId));
 
@@ -434,6 +393,8 @@
 
         try
         {
+            // Ownership fields are set here, so client input cannot place
+            // a task in another project or board. New tasks always start in To Do.
             newTask.ProjectId = board.ProjectId;
             newTask.BoardId = board.Id;
             newTask.OwnerId = userId;
@@ -463,6 +424,7 @@
         }
     }
 
+    /// <summary>Moves a task to another column via the board's move buttons.</summary>
     private async Task UpdateTaskStatus(
         string taskId,
         ProjectTaskStatus status)
@@ -491,6 +453,7 @@
         }
     }
 
+    /// <summary>Copies the task into a separate edit buffer so cancelling discards the changes.</summary>
     private void StartEditTask(ProjectTask task)
     {
         editingTaskId = task.Id;
