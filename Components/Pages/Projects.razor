@@ -187,12 +187,12 @@ Create and manage your projects." />
 
                             <p class="project-list-card-date">
                                 <strong>Start:</strong>
-                                @item.StartDate.ToString("M/d/yyyy")
+                                @item.StartDate.ToLocalTime().ToString("M/d/yyyy")
                             </p>
 
                             <p class="project-list-card-date">
                                 <strong>End:</strong>
-                                @item.EndDate.ToString("M/d/yyyy")
+                                @item.EndDate.ToLocalTime().ToString("M/d/yyyy")
                             </p>
 
                             <div class="card-actions">
@@ -294,8 +294,8 @@ Create and manage your projects." />
             Id = item.Id,
             Name = item.Name,
             Description = item.Description ?? string.Empty,
-            StartDate = item.StartDate,
-            EndDate = item.EndDate
+            StartDate = item.StartDate.ToLocalTime(),
+            EndDate = item.EndDate.ToLocalTime()
         };
     }
 

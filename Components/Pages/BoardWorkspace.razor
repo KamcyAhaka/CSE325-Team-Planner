@@ -272,7 +272,7 @@
                                 @if (task.DueDate is not null)
                                 {
                                     <span class="board-task-due">
-                                        Due @task.DueDate.Value.ToString("M/d/yyyy")
+                                        Due @task.DueDate.Value.ToLocalTime().ToString("M/d/yyyy")
                                     </span>
                                 }
 
@@ -491,7 +491,7 @@
             CreatedAt = task.CreatedAt
         };
         editHasDueDate = task.DueDate is not null;
-        editDueDate = task.DueDate ?? DateTime.Today;
+        editDueDate = task.DueDate?.ToLocalTime() ?? DateTime.Today;
     }
 
     private void CancelEditTask()
