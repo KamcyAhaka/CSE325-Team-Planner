@@ -523,7 +523,7 @@
             CreatedAt = task.CreatedAt
         };
         editHasDueDate = task.DueDate is not null;
-        editDueDate = task.DueDate ?? DateTime.Today;
+        editDueDate = task.DueDate?.ToLocalTime() ?? DateTime.Today;
     }
 
     private void CancelEditTask()

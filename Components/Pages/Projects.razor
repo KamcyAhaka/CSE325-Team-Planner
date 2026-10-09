@@ -292,8 +292,8 @@ Create and manage your projects." />
             Id = item.Id,
             Name = item.Name,
             Description = item.Description ?? string.Empty,
-            StartDate = item.StartDate,
-            EndDate = item.EndDate
+            StartDate = item.StartDate.ToLocalTime(),
+            EndDate = item.EndDate.ToLocalTime()
         };
     }
 

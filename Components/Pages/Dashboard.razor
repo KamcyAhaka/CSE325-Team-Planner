@@ -204,7 +204,7 @@
                 if (task.Status != ProjectTaskStatus.Done)
                 {
                     PendingTaskCount++;
-                    if (task.DueDate.HasValue && task.DueDate.Value.Date <= today)
+                    if (task.DueDate.HasValue && task.DueDate.Value.ToLocalTime().Date <= today)
                         UrgentDeadlineCount++;
                 }
             }
@@ -216,8 +216,8 @@
     private string GetProjectStatus(Project p)
     {
         var now = DateTime.Now;
-        if (p.EndDate < now) return "completed";
-        if (p.StartDate > now) return "planning";
+        if (p.EndDate.ToLocalTime() < now) return "completed";
+        if (p.StartDate.ToLocalTime() > now) return "planning";
         return "active";
     }
 
@@ -225,7 +225,7 @@
         _projectNames.TryGetValue(projectId, out var name) ? name : "Unknown project";
 
     private bool IsOverdue(ProjectTask task) =>
-        task.DueDate.HasValue && task.DueDate.Value < DateTime.Now && task.Status != ProjectTaskStatus.Done;
+        task.DueDate.HasValue && task.DueDate.Value.ToLocalTime() < DateTime.Now && task.Status != ProjectTaskStatus.Done;
 
     private string GetStatusClass(ProjectTaskStatus status) => status switch
     {

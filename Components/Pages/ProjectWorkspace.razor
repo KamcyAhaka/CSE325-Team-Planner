@@ -688,12 +688,12 @@
     {
         var now = DateTime.Now;
 
-        if (p.EndDate < now)
+        if (p.EndDate.ToLocalTime() < now)
         {
             return "completed";
         }
 
-        if (p.StartDate > now)
+        if (p.StartDate.ToLocalTime() > now)
         {
             return "planning";
         }
