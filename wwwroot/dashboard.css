@@ -964,7 +964,7 @@
 .my-tasks-badge {
   font-size: 12px;
   font-weight: 600;
-  color: var(--color-muted);
+  color: var(--color-text-secondary);
   background-color: var(--color-hover);
   padding: 4px 10px;
   border-radius: 9999px;
