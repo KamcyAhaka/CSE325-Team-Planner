@@ -16,11 +16,13 @@ public class UserService
     private static readonly SemaphoreSlim IndexLock = new(1, 1);
     private static bool _indexCreated;
 
+    /// <summary>Creates the service bound to the Users collection of the given database.</summary>
     public UserService(IMongoDatabase database)
     {
         _users = database.GetCollection<AppUser>("Users");
     }
 
+    /// <summary>Creates the unique email index once per process using double-checked locking.</summary>
     private async Task EnsureEmailIndexAsync()
     {
         if (_indexCreated)
@@ -54,6 +56,7 @@ public class UserService
         }
     }
 
+    /// <summary>Finds a user by email, ignoring surrounding whitespace and letter case.</summary>
     public async Task<AppUser?> GetByEmailAsync(string email)
     {
         await EnsureEmailIndexAsync();
@@ -65,6 +68,7 @@ public class UserService
             .FirstOrDefaultAsync();
     }
 
+    /// <summary>Searches users by email or display name, returning at most 10 matches.</summary>
     public async Task<List<AppUser>> SearchUsersAsync(string query)
     {
         var normalized = query.Trim().ToLowerInvariant();
@@ -83,6 +87,7 @@ public class UserService
         return await _users.Find(filter).Limit(10).ToListAsync();
     }
 
+    /// <summary>Loads several users in one query and returns them keyed by user id.</summary>
     public async Task<Dictionary<string, AppUser>> GetUsersByIdsAsync(
         IEnumerable<string> userIds)
     {
@@ -103,6 +108,7 @@ public class UserService
         return users.ToDictionary(user => user.Id);
     }
 
+    /// <summary>Registers a new user with a hashed password; the display name falls back to the email.</summary>
     public async Task<AppUser> CreateUserAsync(string email, string password, string displayName)
     {
         if (string.IsNullOrWhiteSpace(email))
@@ -131,10 +137,13 @@ public class UserService
         return user;
     }
 
+    /// <summary>Checks a password against the stored hash and transparently upgrades outdated hashes.</summary>
     public async Task<bool> VerifyPasswordAsync(AppUser user, string password)
     {
         var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
 
+        // If the hash was produced by an older algorithm, store a fresh one so
+        // future logins are verified with the current algorithm.
         if (result == PasswordVerificationResult.SuccessRehashNeeded)
         {
             user.PasswordHash = _passwordHasher.HashPassword(user, password);
