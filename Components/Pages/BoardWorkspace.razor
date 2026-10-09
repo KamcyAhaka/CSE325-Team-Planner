@@ -173,6 +173,7 @@
 
                     @if (hasDueDate)
                     {
+                        <label for="taskDueDate" class="form-label">Due Date</label>
                         <InputDate id="taskDueDate"
                                    class="form-input"
                                    @bind-Value="dueDate" />
@@ -238,6 +239,7 @@
 
                                         @if (editHasDueDate)
                                         {
+                                            <label for="editTaskDueDate" class="form-label">Due Date</label>
                                             <InputDate id="editTaskDueDate"
                                                        class="form-input"
                                                        @bind-Value="editDueDate" />

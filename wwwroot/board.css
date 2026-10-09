@@ -89,7 +89,7 @@
 .board-column-empty {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--color-muted);
+    color: var(--color-text-secondary);
 }
 
 .board-task-card {

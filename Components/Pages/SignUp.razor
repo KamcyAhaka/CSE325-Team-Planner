@@ -20,16 +20,19 @@
     <ValidationSummary class="form-validation" />
 
     <div class="form-field">
+        <label for="name" class="form-label">Full Name</label>
         <LiveInputText id="name" class="form-input" @bind-Value="user.DisplayName" placeholder="Full Name" autocomplete="name" />
         <ValidationMessage For="() => user.DisplayName" />
     </div>
 
     <div class="form-field">
+        <label for="email" class="form-label">Email</label>
         <LiveInputText id="email" type="email" class="form-input" @bind-Value="user.Email" placeholder="Email" autocomplete="email" />
         <ValidationMessage For="() => user.Email" />
     </div>
 
     <div class="form-field">
+        <label for="password" class="form-label">Password</label>
         <LiveInputText id="password" type="password" class="form-input" @bind-Value="user.Password" placeholder="Password" autocomplete="new-password" />
         <ValidationMessage For="() => user.Password" />
         <p class="password-hint">
