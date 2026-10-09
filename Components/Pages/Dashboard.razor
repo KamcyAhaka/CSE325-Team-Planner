@@ -83,7 +83,7 @@
                         <article class="project-card">
                             <div class="project-card-top">
                                 <span class="project-badge">@GetProjectStatus(p)</span>
-                                <span class="project-date"><span class="icon icon-calendar icon-xs"></span>@(p.EndDate.ToString("M/d/yyyy"))</span>
+                                <span class="project-date"><span class="icon icon-calendar icon-xs"></span>@(p.EndDate.ToLocalTime().ToString("M/d/yyyy"))</span>
                             </div>
                             <h4 class="project-name" title="@p.Name">@p.Name</h4>
                             <p class="project-desc" title="@(p.Description ?? "")">@(string.IsNullOrWhiteSpace(p.Description) ? "No description provided." : p.Description)</p>
@@ -133,7 +133,7 @@
                                     @if (task.DueDate.HasValue)
                                     {
                                         <span class="@(IsOverdue(task) ? "task-due task-due-overdue" : "task-due")">
-                                            <span class="icon icon-calendar icon-xs"></span>@(task.DueDate.Value.ToString("M/d/yyyy"))
+                                            <span class="icon icon-calendar icon-xs"></span>@(task.DueDate.Value.ToLocalTime().ToString("M/d/yyyy"))
                                         </span>
                                     }
                                 </span>

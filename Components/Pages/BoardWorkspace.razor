@@ -304,7 +304,7 @@
                                 @if (task.DueDate is not null)
                                 {
                                     <span class="board-task-due">
-                                        Due @task.DueDate.Value.ToString("M/d/yyyy")
+                                        Due @task.DueDate.Value.ToLocalTime().ToString("M/d/yyyy")
                                     </span>
                                 }
 

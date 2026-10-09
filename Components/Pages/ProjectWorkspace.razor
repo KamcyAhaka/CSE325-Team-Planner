@@ -54,7 +54,7 @@
 
                     <span class="project-date">
                         <span class="icon icon-calendar icon-xs"></span>
-                        Due @project.EndDate.ToString("M/d/yyyy")
+                        Due @project.EndDate.ToLocalTime().ToString("M/d/yyyy")
                     </span>
                 </div>
 
