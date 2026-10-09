@@ -125,49 +125,52 @@
                         }
                     }
 
-                    <div class="@(showAddMember ? "add-member-wrap open" : "add-member-wrap")">
-                        <div class="add-member-form">
-                            <div class="form-field">
-                                <label for="memberSearch" class="form-label">Search by name or email</label>
-                                <input id="memberSearch" type="text" class="form-input" placeholder="Type to search..."
-                                       value="@addMemberQuery" disabled="@addingMemberBusy" @oninput="OnMemberSearchInput" />
+                    @if (userId == project.OwnerId)
+                    {
+                        <div class="@(showAddMember ? "add-member-wrap open" : "add-member-wrap")">
+                            <div class="add-member-form">
+                                <div class="form-field">
+                                    <label for="memberSearch" class="form-label">Search by name or email</label>
+                                    <input id="memberSearch" type="text" class="form-input" placeholder="Type to search..."
+                                           value="@addMemberQuery" disabled="@addingMemberBusy" @oninput="OnMemberSearchInput" />
 
-                                <div class="member-suggestions">
-                                    @if (userSuggestions.Count > 0)
-                                    {
-                                        @foreach (var user in userSuggestions)
+                                    <div class="member-suggestions">
+                                        @if (userSuggestions.Count > 0)
                                         {
-                                            <button type="button" class="member-suggestion" disabled="@addingMemberBusy"
-                                                    @onclick="() => SelectSuggestedUser(user)">
-                                                <span class="avatar avatar-sm">
-                                                    @UserInfo.GetInitials(user.DisplayName)
-                                                </span>
-                                                <span class="member-name">@user.DisplayName</span>
-                                                <span class="member-role">@user.Email</span>
-                                            </button>
+                                            @foreach (var user in userSuggestions)
+                                            {
+                                                <button type="button" class="member-suggestion" disabled="@addingMemberBusy"
+                                                        @onclick="() => SelectSuggestedUser(user)">
+                                                    <span class="avatar avatar-sm">
+                                                        @UserInfo.GetInitials(user.DisplayName)
+                                                    </span>
+                                                    <span class="member-name">@user.DisplayName</span>
+                                                    <span class="member-role">@user.Email</span>
+                                                </button>
+                                            }
                                         }
-                                    }
-                                    else if (addMemberQuery.Trim().Length >= 2 && !addingMemberBusy)
-                                    {
-                                        <p class="form-hint member-suggestion-empty">No users found. Select a suggestion above
-                                            to enable Add.</p>
-                                        }
+                                        else if (addMemberQuery.Trim().Length >= 2 && !addingMemberBusy)
+                                        {
+                                            <p class="form-hint member-suggestion-empty">No users found. Select a suggestion above
+                                                to enable Add.</p>
+                                            }
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="card-actions">
-                                    <button type="button" class="btn btn-primary card-action-btn"
-                                            disabled="@(selectedUser is null || addingMemberBusy)" @onclick="AddMember">
-                                        @(addingMemberBusy ? "Adding..." : "Add")
-                                    </button>
-                                </div>
+                                    <div class="card-actions">
+                                        <button type="button" class="btn btn-primary card-action-btn"
+                                                disabled="@(selectedUser is null || addingMemberBusy)" @onclick="AddMember">
+                                            @(addingMemberBusy ? "Adding..." : "Add")
+                                        </button>
+                                    </div>
 
-                                @if (!string.IsNullOrEmpty(addMemberError))
-                                {
-                                    <p class="form-validation">@addMemberError</p>
-                                }
+                                    @if (!string.IsNullOrEmpty(addMemberError))
+                                    {
+                                        <p class="form-validation">@addMemberError</p>
+                                    }
+                                </div>
                             </div>
-                        </div>
+                        }
                     </div>
                 </div>
             </div>

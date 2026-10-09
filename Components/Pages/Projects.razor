@@ -200,16 +200,19 @@ Create and manage your projects." />
                                    href="/projects/@item.Id">
                                     Open
                                 </a>
-                                <button type="button"
-                                        class="btn btn-outline-secondary card-action-btn"
-                                        @onclick="() => StartEdit(item)">
-                                    Edit
-                                </button>
-                                <button type="button"
-                                        class="btn btn-danger card-action-btn"
-                                        @onclick="() => StartDelete(item)">
-                                    Delete
-                                </button>
+                                @if (item.OwnerId == currentUserId)
+                                {
+                                    <button type="button"
+                                            class="btn btn-outline-secondary card-action-btn"
+                                            @onclick="() => StartEdit(item)">
+                                        Edit
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-danger card-action-btn"
+                                            @onclick="() => StartDelete(item)">
+                                        Delete
+                                    </button>
+                                }
                             </div>
 
                         </div>
@@ -242,8 +245,16 @@ Create and manage your projects." />
     private string? deletingId;
     private bool deleting;
 
+    private string currentUserId = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
+        var authenticationState = await AuthenticationStateProvider
+            .GetAuthenticationStateAsync();
+
+        currentUserId = authenticationState.User
+            .FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+
         await ReloadProjects();
     }
 
@@ -305,7 +316,7 @@ Create and manage your projects." />
         try
         {
             var updated = await Runner.RunAsync(
-                () => ProjectService.UpdateProjectAsync(editProject),
+                () => ProjectService.UpdateProjectAsync(editProject, currentUserId),
                 "Project updated successfully!");
 
             if (updated)
@@ -342,7 +353,7 @@ Create and manage your projects." />
         try
         {
             var deleted = await Runner.RunAsync(
-                () => ProjectService.DeleteProjectAsync(deletingId),
+                () => ProjectService.DeleteProjectAsync(deletingId, currentUserId),
                 "Project deleted successfully!");
 
             if (deleted)
