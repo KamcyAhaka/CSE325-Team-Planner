@@ -239,6 +239,11 @@
   color: var(--color-foreground);
 }
 
+.sidebar-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-subtle);
+}
+
 .sidebar-link.active {
   background-color: var(--color-primary);
   color: #ffffff;
@@ -269,6 +274,11 @@
 
 .sidebar-create:hover {
   background-color: var(--color-primary-faint);
+}
+
+.sidebar-create:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-subtle);
 }
 
 /* Footer */
@@ -338,6 +348,11 @@
 
 .sidebar-signout:hover {
   background-color: var(--color-error-bg);
+}
+
+.sidebar-signout:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-subtle);
 }
 
 /* Main Content Area */
@@ -949,7 +964,7 @@
 .my-tasks-badge {
   font-size: 12px;
   font-weight: 600;
-  color: var(--color-muted);
+  color: var(--color-text-secondary);
   background-color: var(--color-hover);
   padding: 4px 10px;
   border-radius: 9999px;
