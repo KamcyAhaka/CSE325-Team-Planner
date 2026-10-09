@@ -69,9 +69,22 @@ public class ProjectService
             .FirstOrDefaultAsync();
     }
 
-    public async Task UpdateProjectAsync(Project project)
+    public async Task UpdateProjectAsync(Project project, string userId)
     {
         EntityValidator.EnsureValid(project);
+
+        var existing = await GetProjectByIdAsync(project.Id);
+
+        if (existing is null)
+        {
+            throw new AppValidationException("Project not found.");
+        }
+
+        if (existing.OwnerId != userId)
+        {
+            throw new AppValidationException(
+                "Only the project owner can update this project.");
+        }
 
         var filter = Builders<Project>.Filter.Eq(p => p.Id, project.Id);
         var update = Builders<Project>.Update
@@ -80,21 +93,29 @@ public class ProjectService
             .Set(p => p.StartDate, project.StartDate)
             .Set(p => p.EndDate, project.EndDate);
 
-        var result = await _projects.UpdateOneAsync(filter, update);
-
-        if (result.MatchedCount == 0)
-        {
-            throw new AppValidationException("Project not found.");
-        }
+        await _projects.UpdateOneAsync(filter, update);
     }
 
-    public async Task DeleteProjectAsync(string projectId)
+    public async Task DeleteProjectAsync(string projectId, string userId)
     {
         if (string.IsNullOrWhiteSpace(projectId))
         {
             throw new ArgumentException(
                 "Project id is required.",
                 nameof(projectId));
+        }
+
+        var existing = await GetProjectByIdAsync(projectId);
+
+        if (existing is null)
+        {
+            throw new AppValidationException("Project not found.");
+        }
+
+        if (existing.OwnerId != userId)
+        {
+            throw new AppValidationException(
+                "Only the project owner can delete this project.");
         }
 
         var result = await _projects.DeleteOneAsync(p => p.Id == projectId);
