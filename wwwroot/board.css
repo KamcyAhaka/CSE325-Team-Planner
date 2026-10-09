@@ -108,6 +108,21 @@
     margin-bottom: 0;
 }
 
+.board-task-card[draggable="true"] {
+    cursor: grab;
+}
+
+.board-task-card-dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.board-column-drop-target {
+    outline: 2px dashed var(--color-primary, #4f46e5);
+    outline-offset: -2px;
+    background: color-mix(in srgb, var(--color-primary, #4f46e5) 8%, var(--color-hover));
+}
+
 .board-task-card h3 {
     margin: 0;
     font-size: 1rem;
@@ -129,11 +144,6 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-}
-
-.board-task-move-btn {
-    padding: 0.25rem 0.625rem;
-    font-size: 0.8125rem;
 }
 
 @media (max-width: 900px) {
