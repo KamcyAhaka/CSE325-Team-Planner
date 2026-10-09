@@ -9,12 +9,14 @@ public class BoardService
     private readonly IMongoCollection<Board> _boards;
     private readonly IMongoCollection<ProjectTask> _tasks;
 
+    /// <summary>Initializes the service with the MongoDB boards and tasks collections.</summary>
     public BoardService(IMongoDatabase database)
     {
         _boards = database.GetCollection<Board>("Boards");
         _tasks = database.GetCollection<ProjectTask>("Tasks");
     }
 
+    /// <summary>Creates a new board within an existing project.</summary>
     public async Task CreateBoardAsync(Board board)
     {
         EntityValidator.EnsureValid(board);
@@ -22,6 +24,7 @@ public class BoardService
         await _boards.InsertOneAsync(board);
     }
 
+    /// <summary>Returns all boards belonging to the given project.</summary>
     public async Task<List<Board>> GetBoardsByProjectAsync(string projectId)
     {
         return await _boards
@@ -29,6 +32,7 @@ public class BoardService
             .ToListAsync();
     }
 
+    /// <summary>Returns the board with the given id, or null if it does not exist.</summary>
     public async Task<Board?> GetBoardByIdAsync(string boardId)
     {
         if (string.IsNullOrWhiteSpace(boardId))
@@ -43,6 +47,7 @@ public class BoardService
             .FirstOrDefaultAsync();
     }
 
+    /// <summary>Updates the name and description of an existing board.</summary>
     public async Task UpdateBoardAsync(Board board)
     {
         EntityValidator.EnsureValid(board);
@@ -60,6 +65,7 @@ public class BoardService
         }
     }
 
+    /// <summary>Deletes a board and all the tasks it contains.</summary>
     public async Task DeleteBoardAsync(string boardId)
     {
         if (string.IsNullOrWhiteSpace(boardId))
@@ -76,6 +82,7 @@ public class BoardService
             throw new AppValidationException("Board not found.");
         }
 
+        // Cascade delete: remove the board's tasks so no orphaned documents remain.
         await _tasks.DeleteManyAsync(t => t.BoardId == boardId);
     }
 }
