@@ -1,4 +1,8 @@
 @page "/dashboard"
+
+@* Dashboard page: the main landing view after sign-in. Shows a greeting,
+   summary cards (projects, active/completed/urgent tasks) and per-project
+   completion progress for everything the user is involved in. *@
 @using System.Globalization
 @using System.Security.Claims
 @attribute [Authorize]
