@@ -8,15 +8,18 @@ public class ProjectMemberService
 {
     private readonly IMongoCollection<ProjectMember> _members;
 
+    /// <summary>Initializes the service with the MongoDB project members collection.</summary>
     public ProjectMemberService(IMongoDatabase database)
     {
         _members = database.GetCollection<ProjectMember>("ProjectMembers");
     }
 
+    /// <summary>Adds a user to a project, rejecting duplicate memberships.</summary>
     public async Task AddMemberAsync(ProjectMember member)
     {
         EntityValidator.EnsureValid(member);
 
+        // A user can only belong to a project once, so duplicates are rejected.
         var alreadyMember = await _members
             .Find(m => m.ProjectId == member.ProjectId && m.UserId == member.UserId)
             .FirstOrDefaultAsync();
@@ -30,6 +33,7 @@ public class ProjectMemberService
         await _members.InsertOneAsync(member);
     }
 
+    /// <summary>Returns all members of the given project.</summary>
     public async Task<List<ProjectMember>> GetMembersByProjectAsync(string projectId)
     {
         if (string.IsNullOrWhiteSpace(projectId))
@@ -44,6 +48,7 @@ public class ProjectMemberService
             .ToListAsync();
     }
 
+    /// <summary>Removes a member from their project by membership id.</summary>
     public async Task RemoveMemberAsync(string memberId)
     {
         if (string.IsNullOrWhiteSpace(memberId))
@@ -53,6 +58,8 @@ public class ProjectMemberService
                 nameof(memberId));
         }
 
+        // The UI only offers removal to the project owner, so the owner's own
+        // membership can never be deleted through this path.
         var result = await _members.DeleteOneAsync(m => m.Id == memberId);
 
         if (result.DeletedCount == 0)
