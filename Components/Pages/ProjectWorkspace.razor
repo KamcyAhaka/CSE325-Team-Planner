@@ -193,8 +193,9 @@
                     </div>
 
                     <div class="stat-info">
-                        <span class="stat-label">Total Tasks</span>
-                        <span class="stat-value">@tasks.Count Active: @ActiveCount</span>
+                        <span class="stat-label">Tasks Remaining</span>
+                        <span class="stat-value">@ActiveCount</span>
+                        <span class="stat-sub">@DoneCount done · @tasks.Count total</span>
                     </div>
                 </div>
             </div>
@@ -664,6 +665,9 @@
 
     private int ActiveCount =>
         tasks.Count(t => t.Status != ProjectTaskStatus.Done);
+
+    private int DoneCount =>
+        tasks.Count(t => t.Status == ProjectTaskStatus.Done);
 
     private string GetUserName(string id) =>
         usersById.TryGetValue(id, out var user)
