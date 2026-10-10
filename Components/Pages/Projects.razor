@@ -3,7 +3,7 @@
 @page "/projects"
 @layout DashboardLayout
 
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 @attribute [Authorize]
 
