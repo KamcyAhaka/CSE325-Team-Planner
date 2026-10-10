@@ -10,6 +10,8 @@
 @using System.Security.Claims
 
 @inject ProjectService ProjectService
+@inject TaskService TaskService
+@inject ProjectMemberService ProjectMemberService
 @inject UiActionRunner Runner
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
@@ -197,6 +199,22 @@ Create and manage your projects." />
                                 @item.EndDate.ToLocalTime().ToString("M/d/yyyy")
                             </p>
 
+                            <div class="project-card-bottom">
+                                <div class="progress-row">
+                                    <span class="progress-label">Task Completion</span>
+                                    <span class="progress-value">@completionPct.GetValueOrDefault(item.Id)%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: @completionPct.GetValueOrDefault(item.Id)%"></div>
+                                </div>
+                                <div class="project-footer">
+                                    <span class="member-count">
+                                        <span class="icon icon-users icon-sm"></span>
+                                        <strong>@memberCount.GetValueOrDefault(item.Id)</strong> member@(memberCount.GetValueOrDefault(item.Id) == 1 ? "" : "s")
+                                    </span>
+                                </div>
+                            </div>
+
                             <div class="card-actions">
                                 <a class="btn btn-primary card-action-btn"
                                    href="/projects/@item.Id">
@@ -239,6 +257,8 @@ Create and manage your projects." />
 @code {
     private Project project = new() { StartDate = DateTime.Today, EndDate = DateTime.Today.AddMonths(1) };
     private List<Project> projects = new();
+    private Dictionary<string, int> completionPct = new();
+    private Dictionary<string, int> memberCount = new();
     private bool saving;
     private bool showCreateProject;
 
@@ -403,5 +423,20 @@ Create and manage your projects." />
             .FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
 
         projects = await ProjectService.GetProjectsForUserAsync(userId);
+
+        completionPct = new Dictionary<string, int>();
+        memberCount = new Dictionary<string, int>();
+
+        foreach (var project in projects)
+        {
+            var tasks = await TaskService.GetTasksByProjectAsync(project.Id);
+            int done = tasks.Count(t => t.Status == ProjectTaskStatus.Done);
+            completionPct[project.Id] = tasks.Count > 0
+                ? (int)Math.Round(done * 100.0 / tasks.Count)
+                : 0;
+
+            var members = await ProjectMemberService.GetMembersByProjectAsync(project.Id);
+            memberCount[project.Id] = members.Count;
+        }
     }
 }

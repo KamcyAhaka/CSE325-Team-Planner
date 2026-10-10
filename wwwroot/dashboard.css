@@ -474,6 +474,11 @@
   mask-image: url('icons/user-check.svg');
 }
 
+.icon-users {
+  -webkit-mask-image: url('icons/users.svg');
+  mask-image: url('icons/users.svg');
+}
+
 .icon-triangle-alert {
   -webkit-mask-image: url('icons/triangle-alert.svg');
   mask-image: url('icons/triangle-alert.svg');
