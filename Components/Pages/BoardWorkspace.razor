@@ -122,46 +122,62 @@
             </div>
         }
 
-        <EditForm Model="@newTask" OnValidSubmit="@CreateTask" FormName="create-task" Class="form-card board-task-form">
+        @if (showCreateTask)
+        {
+            <EditForm Model="@newTask" OnValidSubmit="@CreateTask" FormName="create-task" Class="form-card">
 
-            <DataAnnotationsValidator />
+                <DataAnnotationsValidator />
 
-            <div class="form">
-                <h2 class="form-title">Create Task</h2>
+                <div class="form">
+                    <h2 class="form-title">Create Task</h2>
 
-                <ValidationSummary class="form-validation" />
+                    <ValidationSummary class="form-validation" />
 
-                <div class="form-field">
-                    <label for="taskTitle" class="form-label">Task Title</label>
-                    <LiveInputText id="taskTitle" class="form-input" @bind-Value="newTask.Title" />
-                    <ValidationMessage For="() => newTask.Title" />
+                    <div class="form-field">
+                        <label for="taskTitle" class="form-label">Task Title</label>
+                        <LiveInputText id="taskTitle" class="form-input" @bind-Value="newTask.Title" />
+                        <ValidationMessage For="() => newTask.Title" />
+                    </div>
+
+                    <div class="form-field">
+                        <label for="taskDescription" class="form-label">Description</label>
+                        <LiveInputTextArea id="taskDescription" class="form-input form-textarea"
+                                           @bind-Value="newTask.Description" />
+                        <ValidationMessage For="() => newTask.Description" />
+                    </div>
+
+                    <div class="form-field board-due-date-field">
+                        <label for="hasDueDate" class="form-label">
+                            <input type="checkbox" id="hasDueDate" @bind="hasDueDate" />
+                            Set a due date
+                        </label>
+
+                        @if (hasDueDate)
+                        {
+                            <label for="taskDueDate" class="form-label">Due Date</label>
+                            <InputDate id="taskDueDate"
+                                       class="form-input"
+                                       @bind-Value="dueDate" />
+                        }
+                    </div>
+
+                    <div class="card-actions">
+                        <SubmitButton Text="Create Task" Class="btn btn-primary card-action-btn" IsBusy="@saving" />
+                        <button type="button" class="btn btn-outline-secondary card-action-btn" disabled="@saving"
+                                @onclick="CancelCreateTask">
+                            Cancel
+                        </button>
+                    </div>
                 </div>
-
-                <div class="form-field">
-                    <label for="taskDescription" class="form-label">Description</label>
-                    <LiveInputTextArea id="taskDescription" class="form-input form-textarea"
-                                       @bind-Value="newTask.Description" />
-                    <ValidationMessage For="() => newTask.Description" />
-                </div>
-
-                <div class="form-field board-due-date-field">
-                    <label for="hasDueDate" class="form-label">
-                        <input type="checkbox" id="hasDueDate" @bind="hasDueDate" />
-                        Set a due date
-                    </label>
-
-                    @if (hasDueDate)
-                    {
-                        <label for="taskDueDate" class="form-label">Due Date</label>
-                        <InputDate id="taskDueDate"
-                                   class="form-input"
-                                   @bind-Value="dueDate" />
-                    }
-                </div>
-
-                <SubmitButton Text="Create Task" IsBusy="@saving" />
-            </div>
-        </EditForm>
+            </EditForm>
+        }
+        else
+        {
+            <button type="button" class="btn btn-primary" @onclick="ToggleCreateTask">
+                <span class="icon icon-plus icon-sm"></span>
+                Add Task
+            </button>
+        }
 
         <div class="board-columns">
             @foreach (var column in Columns)
@@ -309,6 +325,7 @@
     private bool boardNotFound;
     private bool noAccess;
     private bool saving;
+    private bool showCreateTask;
     private ProjectTask newTask = new();
     private bool hasDueDate;
     private DateTime dueDate = DateTime.Today;
@@ -380,6 +397,29 @@
         }
     }
 
+    private void ToggleCreateTask()
+    {
+        showCreateTask = !showCreateTask;
+    }
+
+    private void CancelCreateTask()
+    {
+        ResetNewTask();
+        showCreateTask = false;
+    }
+
+    private void ResetNewTask()
+    {
+        newTask = new ProjectTask
+        {
+            ProjectId = board?.ProjectId,
+            BoardId = board?.Id,
+            OwnerId = userId
+        };
+        hasDueDate = false;
+        dueDate = DateTime.Today;
+    }
+
     private async Task CreateTask()
     {
         if (board is null || saving)
@@ -405,14 +445,8 @@
 
             if (created)
             {
-                newTask = new ProjectTask
-                {
-                    ProjectId = board.ProjectId,
-                    BoardId = board.Id,
-                    OwnerId = userId
-                };
-                hasDueDate = false;
-                dueDate = DateTime.Today;
+                ResetNewTask();
+                showCreateTask = false;
                 await LoadTasks();
             }
         }
