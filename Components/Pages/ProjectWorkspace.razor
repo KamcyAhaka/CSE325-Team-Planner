@@ -39,15 +39,11 @@
     else
     {
         <div class="workspace-top-row">
-            <a href="/dashboard" class="back-link">
-                <span class="icon icon-arrow-left icon-sm"></span>
-                Back to Dashboard
-            </a>
+            <a href="/projects" class="back-link">Projects</a>
 
-            <a href="/boards/create?projectId=@project.Id" class="view-all-link">
-                <span class="icon icon-plus icon-sm"></span>
-                Create Board
-            </a>
+            <span class="icon icon-arrow-right icon-xs breadcrumb-sep"></span>
+
+            <span class="breadcrumb-current">@project.Name</span>
         </div>
 
         <div class="project-header-card">
@@ -193,8 +189,9 @@
                     </div>
 
                     <div class="stat-info">
-                        <span class="stat-label">Total Tasks</span>
-                        <span class="stat-value">@tasks.Count Active: @ActiveCount</span>
+                        <span class="stat-label">Tasks Remaining</span>
+                        <span class="stat-value">@ActiveCount</span>
+                        <span class="stat-sub">@DoneCount done · @tasks.Count total</span>
                     </div>
                 </div>
             </div>
@@ -202,7 +199,51 @@
             <section class="task-board-section">
                 <div class="section-header">
                     <h3 class="section-title">Task Boards</h3>
+
+                    @if (!showCreateBoard)
+                    {
+                        <button type="button" class="btn btn-primary card-action-btn" @onclick="ToggleCreateBoard">
+                            <span class="icon icon-plus icon-sm"></span>
+                            New Board
+                        </button>
+                    }
                 </div>
+
+                @if (showCreateBoard)
+                {
+                    <EditForm Model="@newBoard" OnValidSubmit="@CreateBoard" FormName="create-board" Class="form-card">
+
+                        <DataAnnotationsValidator />
+
+                        <div class="form">
+                            <h2 class="form-title">New Board</h2>
+
+                            <ValidationSummary class="form-validation" />
+
+                            <div class="form-field">
+                                <label for="newBoardName" class="form-label">Board Name</label>
+                                <LiveInputText id="newBoardName" class="form-input" @bind-Value="newBoard.Name" />
+                                <ValidationMessage For="() => newBoard.Name" />
+                            </div>
+
+                            <div class="form-field">
+                                <label for="newBoardDescription" class="form-label">Description</label>
+                                <LiveInputTextArea id="newBoardDescription" class="form-input form-textarea"
+                                                   @bind-Value="newBoard.Description" />
+                                <ValidationMessage For="() => newBoard.Description" />
+                            </div>
+
+                            <div class="card-actions">
+                                <SubmitButton Text="Create Board" Class="btn btn-primary card-action-btn"
+                                              IsBusy="@savingNewBoard" />
+                                <button type="button" class="btn btn-outline-secondary card-action-btn" disabled="@savingNewBoard"
+                                        @onclick="CancelCreateBoard">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </EditForm>
+                }
 
                 @if (boards.Count == 0)
                 {
@@ -328,6 +369,10 @@
     private bool noAccess;
     private string userId = string.Empty;
 
+    private bool showCreateBoard;
+    private Board newBoard = new();
+    private bool savingNewBoard;
+
     private string? editingBoardId;
     private Board editBoard = new();
     private bool savingBoard;
@@ -350,6 +395,8 @@
             notFound = true;
             return;
         }
+
+        newBoard.ProjectId = project.Id;
 
         var members = await ProjectMemberService.GetMembersByProjectAsync(projectId);
 
@@ -390,6 +437,52 @@
         {
             boards = await BoardService.GetBoardsByProjectAsync(project.Id);
             tasks = await TaskService.GetTasksByProjectAsync(project.Id);
+        }
+    }
+
+    private void ToggleCreateBoard()
+    {
+        showCreateBoard = true;
+    }
+
+    private void CancelCreateBoard()
+    {
+        ResetNewBoard();
+        showCreateBoard = false;
+    }
+
+    private void ResetNewBoard()
+    {
+        newBoard = new Board();
+    }
+
+    private async Task CreateBoard()
+    {
+        if (savingNewBoard)
+        {
+            return;
+        }
+
+        savingNewBoard = true;
+
+        try
+        {
+            newBoard.ProjectId = project!.Id;
+
+            var created = await Runner.RunAsync(
+                () => BoardService.CreateBoardAsync(newBoard),
+                "Board created successfully!");
+
+            if (created)
+            {
+                ResetNewBoard();
+                showCreateBoard = false;
+                await LoadTasks();
+            }
+        }
+        finally
+        {
+            savingNewBoard = false;
         }
     }
 
@@ -664,6 +757,9 @@
 
     private int ActiveCount =>
         tasks.Count(t => t.Status != ProjectTaskStatus.Done);
+
+    private int DoneCount =>
+        tasks.Count(t => t.Status == ProjectTaskStatus.Done);
 
     private string GetUserName(string id) =>
         usersById.TryGetValue(id, out var user)

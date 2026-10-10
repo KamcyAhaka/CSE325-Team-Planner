@@ -41,10 +41,15 @@
     else
     {
         <div class="workspace-top-row">
-            <a href="/projects/@board.ProjectId" class="back-link">
-                <span class="icon icon-arrow-left icon-sm"></span>
-                Back to Project
-            </a>
+            <a href="/projects" class="back-link">Projects</a>
+
+            <span class="icon icon-arrow-right icon-xs breadcrumb-sep"></span>
+
+            <a href="/projects/@board.ProjectId" class="back-link">@projectName</a>
+
+            <span class="icon icon-arrow-right icon-xs breadcrumb-sep"></span>
+
+            <span class="breadcrumb-current">@board.Name</span>
         </div>
 
         @if (editingBoard)
@@ -122,46 +127,67 @@
             </div>
         }
 
-        <EditForm Model="@newTask" OnValidSubmit="@CreateTask" FormName="create-task" Class="form-card board-task-form">
+        <div class="section-header">
+            <h3 class="section-title">Tasks</h3>
 
-            <DataAnnotationsValidator />
+            @if (!showCreateTask)
+            {
+                <button type="button" class="btn btn-primary card-action-btn" @onclick="ToggleCreateTask">
+                    <span class="icon icon-plus icon-sm"></span>
+                    Add Task
+                </button>
+            }
+        </div>
 
-            <div class="form">
-                <h2 class="form-title">Create Task</h2>
+        @if (showCreateTask)
+        {
+            <EditForm Model="@newTask" OnValidSubmit="@CreateTask" FormName="create-task" Class="form-card">
 
-                <ValidationSummary class="form-validation" />
+                <DataAnnotationsValidator />
 
-                <div class="form-field">
-                    <label for="taskTitle" class="form-label">Task Title</label>
-                    <LiveInputText id="taskTitle" class="form-input" @bind-Value="newTask.Title" />
-                    <ValidationMessage For="() => newTask.Title" />
+                <div class="form">
+                    <h2 class="form-title">Create Task</h2>
+
+                    <ValidationSummary class="form-validation" />
+
+                    <div class="form-field">
+                        <label for="taskTitle" class="form-label">Task Title</label>
+                        <LiveInputText id="taskTitle" class="form-input" @bind-Value="newTask.Title" />
+                        <ValidationMessage For="() => newTask.Title" />
+                    </div>
+
+                    <div class="form-field">
+                        <label for="taskDescription" class="form-label">Description</label>
+                        <LiveInputTextArea id="taskDescription" class="form-input form-textarea"
+                                           @bind-Value="newTask.Description" />
+                        <ValidationMessage For="() => newTask.Description" />
+                    </div>
+
+                    <div class="form-field board-due-date-field">
+                        <label for="hasDueDate" class="form-label">
+                            <input type="checkbox" id="hasDueDate" @bind="hasDueDate" />
+                            Set a due date
+                        </label>
+
+                        @if (hasDueDate)
+                        {
+                            <label for="taskDueDate" class="form-label">Due Date</label>
+                            <InputDate id="taskDueDate"
+                                       class="form-input"
+                                       @bind-Value="dueDate" />
+                        }
+                    </div>
+
+                    <div class="card-actions">
+                        <SubmitButton Text="Create Task" Class="btn btn-primary card-action-btn" IsBusy="@saving" />
+                        <button type="button" class="btn btn-outline-secondary card-action-btn" disabled="@saving"
+                                @onclick="CancelCreateTask">
+                            Cancel
+                        </button>
+                    </div>
                 </div>
-
-                <div class="form-field">
-                    <label for="taskDescription" class="form-label">Description</label>
-                    <LiveInputTextArea id="taskDescription" class="form-input form-textarea"
-                                       @bind-Value="newTask.Description" />
-                    <ValidationMessage For="() => newTask.Description" />
-                </div>
-
-                <div class="form-field board-due-date-field">
-                    <label for="hasDueDate" class="form-label">
-                        <input type="checkbox" id="hasDueDate" @bind="hasDueDate" />
-                        Set a due date
-                    </label>
-
-                    @if (hasDueDate)
-                    {
-                        <label for="taskDueDate" class="form-label">Due Date</label>
-                        <InputDate id="taskDueDate"
-                                   class="form-input"
-                                   @bind-Value="dueDate" />
-                    }
-                </div>
-
-                <SubmitButton Text="Create Task" IsBusy="@saving" />
-            </div>
-        </EditForm>
+            </EditForm>
+        }
 
         <div class="board-columns">
             @foreach (var column in Columns)
@@ -304,11 +330,13 @@
     public string boardId { get; set; } = string.Empty;
 
     private Board? board;
+    private string projectName = string.Empty;
     private List<ProjectTask> tasks = new();
     private readonly HashSet<string> movingTaskIds = new();
     private bool boardNotFound;
     private bool noAccess;
     private bool saving;
+    private bool showCreateTask;
     private ProjectTask newTask = new();
     private bool hasDueDate;
     private DateTime dueDate = DateTime.Today;
@@ -366,6 +394,8 @@
             return;
         }
 
+        projectName = project.Name;
+
         newTask.ProjectId = board.ProjectId;
         newTask.BoardId = board.Id;
         newTask.OwnerId = userId;
@@ -378,6 +408,29 @@
         {
             tasks = await TaskService.GetTasksByBoardAsync(board.Id);
         }
+    }
+
+    private void ToggleCreateTask()
+    {
+        showCreateTask = !showCreateTask;
+    }
+
+    private void CancelCreateTask()
+    {
+        ResetNewTask();
+        showCreateTask = false;
+    }
+
+    private void ResetNewTask()
+    {
+        newTask = new ProjectTask
+        {
+            ProjectId = board?.ProjectId,
+            BoardId = board?.Id,
+            OwnerId = userId
+        };
+        hasDueDate = false;
+        dueDate = DateTime.Today;
     }
 
     private async Task CreateTask()
@@ -405,14 +458,8 @@
 
             if (created)
             {
-                newTask = new ProjectTask
-                {
-                    ProjectId = board.ProjectId,
-                    BoardId = board.Id,
-                    OwnerId = userId
-                };
-                hasDueDate = false;
-                dueDate = DateTime.Today;
+                ResetNewTask();
+                showCreateTask = false;
                 await LoadTasks();
             }
         }
