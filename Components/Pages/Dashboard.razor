@@ -238,8 +238,12 @@
         _ => "done"
     };
 
-    private string GetStatusLabel(ProjectTaskStatus status) =>
-        status == ProjectTaskStatus.Done ? "Done" : status.ToString();
+    private string GetStatusLabel(ProjectTaskStatus status) => status switch
+    {
+        ProjectTaskStatus.ToDo => "To Do",
+        ProjectTaskStatus.InProgress => "In Progress",
+        _ => "Done"
+    };
 
     private class ProjectSummary
     {
