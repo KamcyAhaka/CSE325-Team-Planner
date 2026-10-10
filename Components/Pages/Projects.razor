@@ -12,6 +12,7 @@
 @inject ProjectService ProjectService
 @inject UiActionRunner Runner
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 
 <PageTitle>Projects</PageTitle>
 
@@ -258,6 +259,12 @@ Create and manage your projects." />
             .FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
 
         await ReloadProjects();
+
+        var uri = new Uri(NavigationManager.Uri);
+        if (uri.Query.Contains("new=1"))
+        {
+            showCreateProject = true;
+        }
     }
 
     private async Task CreateProject()
