@@ -4,7 +4,7 @@
 @page "/register"
 
 @layout AuthLayout
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject UserService UserService
 @inject NavigationManager NavigationManager
 @inject UiActionRunner Runner
