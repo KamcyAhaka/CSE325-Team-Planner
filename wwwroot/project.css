@@ -79,7 +79,9 @@
 .workspace-top-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
     margin-bottom: 1.5rem;
 }
 
@@ -95,6 +97,16 @@
 
 .back-link:hover {
     color: var(--color-primary-hover);
+}
+
+.breadcrumb-sep {
+    color: var(--color-muted);
+}
+
+.breadcrumb-current {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
 }
 
 .project-header-card {
