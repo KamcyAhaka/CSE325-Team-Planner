@@ -16,14 +16,9 @@
 }
 
 .project-list {
-    margin-top: 2rem;
-}
-
-.project-list-title {
-    margin: 0 0 1rem;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--color-foreground);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .project-grid {

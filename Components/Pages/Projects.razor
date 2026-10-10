@@ -20,72 +20,73 @@ Create and manage your projects." />
 
 <div class="project-page">
 
-    <div class="form-card">
+    <div class="project-list">
 
-        <h2 class="form-title">Create Project</h2>
+        <div class="section-header">
+            <h3 class="section-title">Projects</h3>
 
-        <EditForm Model="@project" OnValidSubmit="@CreateProject" FormName="create-project">
+            @if (!showCreateProject)
+            {
+                <button type="button" class="btn btn-primary card-action-btn" @onclick="ToggleCreateProject">
+                    <span class="icon icon-plus icon-sm"></span>
+                    New Project
+                </button>
+            }
+        </div>
 
-            <DataAnnotationsValidator />
+        @if (showCreateProject)
+        {
+            <EditForm Model="@project" OnValidSubmit="@CreateProject" FormName="create-project" Class="form-card">
 
-            <div class="form">
+                <DataAnnotationsValidator />
 
-                <ValidationSummary class="form-validation" />
+                <div class="form">
+                    <h2 class="form-title">New Project</h2>
 
-                <div class="form-field">
-                    <label for="projectName" class="form-label">
-                        Project Name
-                    </label>
-
-                    <LiveInputText id="projectName" class="form-input" @bind-Value="project.Name" />
-                    <ValidationMessage For="() => project.Name" />
-                </div>
-
-                <div class="form-field">
-                    <label for="projectDescription" class="form-label">
-                        Description
-                    </label>
-
-                    <LiveInputTextArea id="projectDescription" class="form-input form-textarea"
-                                       @bind-Value="project.Description" />
-                    <ValidationMessage For="() => project.Description" />
-                </div>
-
-                <div class="project-date-row">
+                    <ValidationSummary class="form-validation" />
 
                     <div class="form-field">
-                        <label for="startDate" class="form-label">
-                            Start Date
-                        </label>
-
-                        <InputDate id="startDate" class="form-input" @bind-Value="project.StartDate" />
+                        <label for="projectName" class="form-label">Project Name</label>
+                        <LiveInputText id="projectName" class="form-input" @bind-Value="project.Name" />
+                        <ValidationMessage For="() => project.Name" />
                     </div>
 
                     <div class="form-field">
-                        <label for="endDate" class="form-label">
-                            End Date
-                        </label>
-
-                        <InputDate id="endDate" class="form-input" @bind-Value="project.EndDate" />
-                        <ValidationMessage For="() => project.EndDate" />
+                        <label for="projectDescription" class="form-label">Description</label>
+                        <LiveInputTextArea id="projectDescription" class="form-input form-textarea"
+                                           @bind-Value="project.Description" />
+                        <ValidationMessage For="() => project.Description" />
                     </div>
 
+                    <div class="project-date-row">
+
+                        <div class="form-field">
+                            <label for="startDate" class="form-label">Start Date</label>
+                            <InputDate id="startDate" class="form-input" @bind-Value="project.StartDate" />
+                        </div>
+
+                        <div class="form-field">
+                            <label for="endDate" class="form-label">End Date</label>
+                            <InputDate id="endDate" class="form-input" @bind-Value="project.EndDate" />
+                            <ValidationMessage For="() => project.EndDate" />
+                        </div>
+
+                    </div>
+
+                    <div class="card-actions">
+                        <SubmitButton Text="Create Project" Class="btn btn-primary card-action-btn"
+                                      IsBusy="@saving" />
+                        <button type="button" class="btn btn-outline-secondary card-action-btn" disabled="@saving"
+                                @onclick="CancelCreateProject">
+                            Cancel
+                        </button>
+                    </div>
                 </div>
+            </EditForm>
+        }
 
-                <SubmitButton Text="Create Project" IsBusy="@saving" />
-
-            </div>
-
-        </EditForm>
-
-    </div>
-
-    @if (projects.Count > 0)
-    {
-        <div class="project-list">
-
-            <h2 class="project-list-title">Projects</h2>
-
+        @if (projects.Count > 0)
+        {
             <div class="project-grid">
 
                 @foreach (var item in projects)
@@ -220,15 +221,15 @@ Create and manage your projects." />
                 }
 
             </div>
+        }
+        else if (!showCreateProject)
+        {
+            <div class="project-empty">
+                No projects have been created yet.
+            </div>
+        }
 
-        </div>
-    }
-    else
-    {
-        <div class="project-empty">
-            No projects have been created yet.
-        </div>
-    }
+    </div>
 
 </div>
 
@@ -238,6 +239,7 @@ Create and manage your projects." />
     private Project project = new() { StartDate = DateTime.Today, EndDate = DateTime.Today.AddMonths(1) };
     private List<Project> projects = new();
     private bool saving;
+    private bool showCreateProject;
 
     private string? editingId;
     private Project editProject = new();
@@ -276,7 +278,8 @@ Create and manage your projects." />
 
             if (created)
             {
-                project = new Project { StartDate = DateTime.Today, EndDate = DateTime.Today.AddMonths(1) };
+                ResetProjectForm();
+                showCreateProject = false;
                 await ReloadProjects();
             }
         }
@@ -284,6 +287,22 @@ Create and manage your projects." />
         {
             saving = false;
         }
+    }
+
+    private void ToggleCreateProject()
+    {
+        showCreateProject = !showCreateProject;
+    }
+
+    private void CancelCreateProject()
+    {
+        ResetProjectForm();
+        showCreateProject = false;
+    }
+
+    private void ResetProjectForm()
+    {
+        project = new Project { StartDate = DateTime.Today, EndDate = DateTime.Today.AddMonths(1) };
     }
 
     private void StartEdit(Project item)
