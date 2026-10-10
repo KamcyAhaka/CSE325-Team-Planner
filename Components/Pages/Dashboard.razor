@@ -3,7 +3,6 @@
    completion progress for everything the user is involved in. *@
 @page "/dashboard"
 
-@using System.Globalization
 @using System.Security.Claims
 @attribute [Authorize]
 @layout DashboardLayout
@@ -41,8 +40,8 @@
         <div class="stat-card">
             <div class="stat-icon stat-icon-blue"><span class="icon icon-square-check"></span></div>
             <div class="stat-info">
-                <span class="stat-label">Assigned Tasks</span>
-                <span class="stat-value">@AssignedTaskCount</span>
+                <span class="stat-label">Active Tasks</span>
+                <span class="stat-value">@ActiveTaskCount</span>
             </div>
         </div>
         <div class="stat-card">
@@ -114,7 +113,7 @@
         <section class="content-col">
             <div class="section-header">
                 <h3 class="section-title">My Tasks</h3>
-                <span class="my-tasks-badge">@PendingTaskCount Pending</span>
+                <span class="my-tasks-badge">@PendingTaskCount Active</span>
             </div>
 
             @if (MyTasks.Count == 0)
@@ -164,7 +163,6 @@
 
     private int ProjectCount => ProjectSummaries.Count;
     private int ActiveTaskCount => MyTasks.Count(t => t.Status != ProjectTaskStatus.Done);
-    private int AssignedTaskCount => ActiveTaskCount;
     private int CompletedTaskCount = 0;
     private int UrgentDeadlineCount = 0;
     private int PendingTaskCount = 0;
@@ -178,7 +176,7 @@
             ?? "there";
 
         var now = DateTime.Now;
-        TodayDate = now.ToString("dddd, MMMM d, yyyy", new CultureInfo("en-US"));
+        TodayDate = now.ToString("M/d/yyyy");
         int hour = now.Hour;
         Greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
