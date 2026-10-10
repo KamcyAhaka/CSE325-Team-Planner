@@ -2,7 +2,7 @@
 @page "/boards/create"
 @layout DashboardLayout
 
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 @attribute [Authorize]
 
