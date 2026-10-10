@@ -122,6 +122,18 @@
             </div>
         }
 
+        <div class="section-header">
+            <h3 class="section-title">Tasks</h3>
+
+            @if (!showCreateTask)
+            {
+                <button type="button" class="btn btn-primary card-action-btn" @onclick="ToggleCreateTask">
+                    <span class="icon icon-plus icon-sm"></span>
+                    Add Task
+                </button>
+            }
+        </div>
+
         @if (showCreateTask)
         {
             <EditForm Model="@newTask" OnValidSubmit="@CreateTask" FormName="create-task" Class="form-card">
@@ -170,13 +182,6 @@
                     </div>
                 </div>
             </EditForm>
-        }
-        else
-        {
-            <button type="button" class="btn btn-primary" @onclick="ToggleCreateTask">
-                <span class="icon icon-plus icon-sm"></span>
-                Add Task
-            </button>
         }
 
         <div class="board-columns">

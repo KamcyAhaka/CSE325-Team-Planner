@@ -16,10 +16,14 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-.board-header {
-    margin-bottom: 1.5rem;
+/* Spacing handled by the parent's flex gap */
+.board-workspace > .workspace-top-row {
+    margin-bottom: 0;
 }
 
 .board-header h1 {
@@ -54,7 +58,6 @@
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1rem;
-    margin-top: 1rem;
     align-items: start;
 }
 
