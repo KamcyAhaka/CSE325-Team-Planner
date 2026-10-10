@@ -253,6 +253,9 @@
 
 .task-board-section {
     margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 @media (max-width: 900px) {

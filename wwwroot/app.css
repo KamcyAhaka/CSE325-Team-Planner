@@ -125,7 +125,7 @@ body {
     color: var(--color-error);
 }
 
-/* ===== Shared form components (Projects, BoardCreation, Auth) ===== */
+/* ===== Shared form components (Projects, Boards, Auth) ===== */
 .spinner {
     width: 1rem;
     height: 1rem;
